@@ -163,7 +163,24 @@
     border-top:1px dashed var(--gold-line);
   }
   .share-card{
-    padding:4px;
+    aspect-ratio: 1 / 1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:32px 24px;
+    box-sizing:border-box;
+    background:var(--papyrus);
+    border:1px solid var(--gold-line);
+    border-radius:4px;
+    text-align:center;
+  }
+  .share-title{
+    font-size:12px;
+    letter-spacing:0.3em;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin-bottom:20px;
   }
   .reroll{
     width:100%;
@@ -236,6 +253,7 @@
 
     <div class="result" id="result">
       <div class="share-card" id="shareCard">
+        <div class="share-title">我的希臘名字</div>
         <div class="name" id="outName">—</div>
         <div class="line-en" id="outLineEn">—</div>
         <div class="line-zh" id="outLineZh">—</div>
@@ -1123,12 +1141,31 @@ function canvasToBlob(canvas){
 
 document.getElementById('downloadBtn').addEventListener('click', async ()=>{
   const nameText = document.getElementById('outName').textContent || 'greek-name';
+  const win = window.open('', '_blank');
   const canvas = await captureCard();
-  if(!canvas) return;
-  const link = document.createElement('a');
-  link.download = `${nameText}.png`;
-  link.href = canvas.toDataURL('image/png');
-  link.click();
+  if(!canvas){
+    if(win) win.close();
+    return;
+  }
+  const dataUrl = canvas.toDataURL('image/png');
+  if(win){
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${nameText}</title>
+      <style>
+        body{margin:0;background:#1a1210;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:sans-serif;}
+        img{max-width:100%;max-height:80vh;width:auto;height:auto;}
+        p{color:#e8dcc4;padding:20px;text-align:center;font-size:15px;line-height:1.6;}
+      </style>
+      </head><body>
+      <img src="${dataUrl}" alt="${nameText}"/>
+      <p>長按圖片，選擇「儲存到照片」即可存到相簿</p>
+      </body></html>`);
+    win.document.close();
+  } else {
+    const link = document.createElement('a');
+    link.download = `${nameText}.png`;
+    link.href = dataUrl;
+    link.click();
+  }
 });
 
 document.getElementById('shareBtn').addEventListener('click', async ()=>{
