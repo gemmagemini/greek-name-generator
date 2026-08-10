@@ -205,6 +205,28 @@
     gap:10px;
     margin-top:12px;
   }
+  .format-row{
+    display:flex;
+    gap:8px;
+    margin-top:20px;
+  }
+  .format-pill{
+    flex:1;
+    text-align:center;
+    padding:8px 4px;
+    font-size:12.5px;
+    border:1px solid var(--gold-line);
+    border-radius:20px;
+    cursor:pointer;
+    color:var(--ink-soft);
+    background:var(--papyrus);
+    user-select:none;
+  }
+  .format-pill.active{
+    background:var(--terracotta);
+    border-color:var(--terracotta);
+    color:var(--papyrus);
+  }
   .action-btn{
     flex:1;
     padding:12px 8px;
@@ -262,6 +284,12 @@
       </div>
 
       <button class="mode-btn" id="rerollBtn" style="width:100%; flex:none; margin-top:36px;">不喜歡這個名字，想看其他的</button>
+
+      <div class="format-row" id="formatRow">
+        <div class="format-pill active" data-format="story">限動／Reels</div>
+        <div class="format-pill" data-format="post">貼文</div>
+        <div class="format-pill" data-format="square">訊息／方形</div>
+      </div>
 
       <div class="action-row">
         <button class="action-btn" id="downloadBtn">
@@ -1114,21 +1142,52 @@ document.getElementById('nameInput').addEventListener('keydown', (e)=>{
   }
 });
 
+const SITE_URL = 'https://gemmagemini.github.io/greek-name-generator/';
+
+const shareFormats = {
+  story: {width:400, height: Math.round(400*1920/1080), label:"限動／Reels"},
+  post: {width:400, height: Math.round(400*1350/1080), label:"貼文"},
+  square: {width:400, height:400, label:"訊息／方形"}
+};
+
+let currentFormat = 'story';
+
+document.querySelectorAll('.format-pill').forEach(p=>{
+  p.addEventListener('click', ()=>{
+    document.querySelectorAll('.format-pill').forEach(x=>x.classList.remove('active'));
+    p.classList.add('active');
+    currentFormat = p.dataset.format;
+  });
+});
+
 async function captureCard(){
   if(typeof html2canvas === 'undefined'){
     alert('圖片截圖功能載入失敗，可能是網路限制或瀏覽器擋掉了外部資源，請確認網路連線後重新整理頁面再試一次');
     return null;
   }
-  const node = document.getElementById('shareCard');
+  const fmt = shareFormats[currentFormat] || shareFormats.square;
+  const source = document.getElementById('shareCard');
+  const temp = document.createElement('div');
+  temp.className = 'share-card';
+  temp.style.position = 'fixed';
+  temp.style.left = '-9999px';
+  temp.style.top = '0';
+  temp.style.width = fmt.width + 'px';
+  temp.style.height = fmt.height + 'px';
+  temp.style.aspectRatio = 'auto';
+  temp.innerHTML = source.innerHTML;
+  document.body.appendChild(temp);
   try{
-    const canvas = await html2canvas(node, {
+    const canvas = await html2canvas(temp, {
       backgroundColor: '#EADFC4',
-      scale: 3,
+      scale: 1080 / fmt.width,
       useCORS: true,
       allowTaint: false
     });
+    document.body.removeChild(temp);
     return canvas;
   }catch(err){
+    document.body.removeChild(temp);
     console.error('html2canvas failed:', err);
     alert('截圖失敗了，可能是網路或瀏覽器限制造成的，可以試試看重新整理頁面，或直接對這個結果卡截圖分享');
     return null;
@@ -1170,6 +1229,8 @@ document.getElementById('downloadBtn').addEventListener('click', async ()=>{
 
 document.getElementById('shareBtn').addEventListener('click', async ()=>{
   const nameText = document.getElementById('outName').textContent || 'greek-name';
+  const titleZh = document.getElementById('outLineZh').textContent || '';
+  const shareText = `我的希臘名字是 ${nameText}，${titleZh}\n點這裡找尋你的希臘名字：${SITE_URL}`;
   const canvas = await captureCard();
   if(!canvas) return;
   const blob = await canvasToBlob(canvas);
@@ -1184,7 +1245,7 @@ document.getElementById('shareBtn').addEventListener('click', async ()=>{
       await navigator.share({
         files:[file],
         title:'我的希臘名字',
-        text:`我的希臘名字是 ${nameText}`
+        text: shareText
       });
       return;
     }catch(err){
