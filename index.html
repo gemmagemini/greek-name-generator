@@ -270,6 +270,16 @@
     margin-top:4px;
     padding:6px;
   }
+  .preview-modal{
+    max-width:360px;
+  }
+  .preview-modal img{
+    width:100%;
+    height:auto;
+    border-radius:2px;
+    margin-bottom:14px;
+    display:block;
+  }
   .action-btn{
     flex:1;
     padding:12px 8px;
@@ -389,6 +399,14 @@
     <button class="format-modal-btn" id="pickStory">限動／Reels（9:16）</button>
     <button class="format-modal-btn" id="pickSquare">方形（1:1）</button>
     <button class="format-modal-cancel" id="pickCancel">取消</button>
+  </div>
+</div>
+
+<div class="format-modal-overlay" id="previewOverlay">
+  <div class="format-modal preview-modal">
+    <img id="previewImg" src="" alt="" />
+    <p>長按圖片，選擇「儲存到照片」即可存到相簿</p>
+    <button class="format-modal-cancel" id="closePreview">關閉</button>
   </div>
 </div>
 
@@ -1139,6 +1157,20 @@ const classicPatronTemplates = [
   (godZh, domainZh) => `${domainZh}，是${godZh}留給後代的印記`
 ];
 
+function setNameText(text){
+  const el = document.getElementById('outName');
+  el.style.whiteSpace = 'nowrap';
+  let fontSize = 32;
+  el.style.fontSize = fontSize + 'px';
+  el.textContent = text;
+  const container = document.getElementById('shareCard');
+  const maxWidth = container.clientWidth - 56;
+  while(el.scrollWidth > maxWidth && fontSize > 15){
+    fontSize -= 1;
+    el.style.fontSize = fontSize + 'px';
+  }
+}
+
 function renderClassic(raw){
   const gender = detectGender(raw);
   const ety = getEtymology(raw);
@@ -1154,12 +1186,12 @@ function renderClassic(raw){
   const override = nameOverrides[raw.toLowerCase().trim()];
   const displayName = override ? override[0].name : built.name;
 
-  document.getElementById('outName').textContent = displayName;
   document.getElementById('outLineEn').textContent = `${titleEnNoun} of ${ety.domainEn}`;
   document.getElementById('outLineZh').textContent = `${ety.domainZh}${titleZhBare}`;
   document.getElementById('outEtymology').textContent = `字源 · ${ety.origin}，意為「${ety.meaning}」`;
   document.getElementById('outPatron').textContent = classicPatronTemplates[tplIdx](ety.godZh, ety.domainZh);
   document.getElementById('result').classList.add('show');
+  setNameText(displayName);
 }
 
 function renderPlayful(raw){
@@ -1188,12 +1220,12 @@ function renderPlayful(raw){
   }
   const trickster = getTrickster(ety);
 
-  document.getElementById('outName').textContent = displayName;
   document.getElementById('outLineEn').textContent = `${modEn} ${titleEnNoun}`;
   document.getElementById('outLineZh').textContent = `${modZh}${titleZhBare}`;
   document.getElementById('outEtymology').textContent = `字源 · ${ety.origin}，意為「${ety.meaning}」`;
   document.getElementById('outPatron').textContent = `由惡作劇之神${trickster.zh}（${trickster.tag}）欽點`;
   document.getElementById('result').classList.add('show');
+  setNameText(displayName);
 }
 
 let currentMode = null;
@@ -1245,7 +1277,7 @@ async function captureCard(formatKey){
   const node = document.getElementById('shareCard');
   const originalStyle = node.getAttribute('style') || '';
   const noExportEls = node.querySelectorAll('.no-export');
-  noExportEls.forEach(el => el.style.visibility = 'hidden');
+  noExportEls.forEach(el => el.style.display = 'none');
 
   node.style.position = 'fixed';
   node.style.top = '0';
@@ -1269,11 +1301,11 @@ async function captureCard(formatKey){
       allowTaint: false
     });
     node.setAttribute('style', originalStyle);
-    noExportEls.forEach(el => el.style.visibility = '');
+    noExportEls.forEach(el => el.style.display = '');
     return canvas;
   }catch(err){
     node.setAttribute('style', originalStyle);
-    noExportEls.forEach(el => el.style.visibility = '');
+    noExportEls.forEach(el => el.style.display = '');
     console.error('html2canvas failed:', err);
     alert('截圖失敗了，可能是網路或瀏覽器限制造成的，可以試試看重新整理頁面，或直接對這個結果卡截圖分享');
     return null;
@@ -1286,31 +1318,13 @@ function canvasToBlob(canvas){
 
 async function doDownload(formatKey){
   const nameText = document.getElementById('outName').textContent || 'greek-name';
-  const win = window.open('', '_blank');
   const canvas = await captureCard(formatKey);
-  if(!canvas){
-    if(win) win.close();
-    return;
-  }
+  if(!canvas) return;
   const dataUrl = canvas.toDataURL('image/png');
-  if(win){
-    win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${nameText}</title>
-      <style>
-        body{margin:0;background:#1a1210;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:sans-serif;}
-        img{max-width:100%;max-height:80vh;width:auto;height:auto;}
-        p{color:#e8dcc4;padding:20px;text-align:center;font-size:15px;line-height:1.6;}
-      </style>
-      </head><body>
-      <img src="${dataUrl}" alt="${nameText}"/>
-      <p>長按圖片，選擇「儲存到照片」即可存到相簿</p>
-      </body></html>`);
-    win.document.close();
-  } else {
-    const link = document.createElement('a');
-    link.download = `${nameText}.png`;
-    link.href = dataUrl;
-    link.click();
-  }
+  const previewImg = document.getElementById('previewImg');
+  previewImg.src = dataUrl;
+  previewImg.alt = nameText;
+  document.getElementById('previewOverlay').classList.add('show');
 }
 
 async function doShare(formatKey){
@@ -1378,6 +1392,18 @@ document.getElementById('pickCancel').addEventListener('click', ()=>{
 formatModalOverlay.addEventListener('click', (e)=>{
   if(e.target === formatModalOverlay){
     formatModalOverlay.classList.remove('show');
+  }
+});
+
+const previewOverlay = document.getElementById('previewOverlay');
+
+document.getElementById('closePreview').addEventListener('click', ()=>{
+  previewOverlay.classList.remove('show');
+});
+
+previewOverlay.addEventListener('click', (e)=>{
+  if(e.target === previewOverlay){
+    previewOverlay.classList.remove('show');
   }
 });
 
