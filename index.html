@@ -294,6 +294,36 @@
     height:15px;
     flex-shrink:0;
   }
+  .name-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+  }
+  .pronounce-icon-btn{
+    width:26px;
+    height:26px;
+    flex-shrink:0;
+    border-radius:50%;
+    border:1px solid var(--gold-line);
+    background:var(--papyrus-2);
+    color:var(--terracotta-deep);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    padding:0;
+  }
+  .pronounce-icon-btn:hover{
+    background:var(--terracotta);
+    color:var(--papyrus);
+    border-color:var(--terracotta);
+  }
+  .pronounce-icon-btn svg{
+    width:13px;
+    height:13px;
+    flex-shrink:0;
+  }
 </style>
 </head>
 <body>
@@ -322,7 +352,12 @@
           <svg viewBox="0 0 160 14" preserveAspectRatio="xMidYMid meet"><polyline points="0,7 10,7 10,0 20,0 20,14 30,14 30,0 40,0 40,7 50,7 50,0 60,0 60,14 70,14 70,0 80,0 80,7 90,7 90,0 100,0 100,14 110,14 110,0 120,0 120,7 130,7 130,0 140,0 140,14 150,14 150,0 160,0" fill="none" stroke="#A97C3B" stroke-width="1.5"/></svg>
         </div>
         <div class="share-title">我的希臘名字</div>
-        <div class="name" id="outName">—</div>
+        <div class="name-row">
+          <div class="name" id="outName">—</div>
+          <button class="pronounce-icon-btn no-export" id="pronounceBtn" type="button" aria-label="聽聽看怎麼唸">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/></svg>
+          </button>
+        </div>
         <div class="line-en" id="outLineEn">—</div>
         <div class="line-zh" id="outLineZh">—</div>
         <div class="etymology" id="outEtymology"></div>
@@ -350,7 +385,7 @@
 
 <div class="format-modal-overlay" id="formatModalOverlay">
   <div class="format-modal">
-    <p>要下載哪種比例的圖片？</p>
+    <p>要用哪種比例的圖片？</p>
     <button class="format-modal-btn" id="pickStory">限動／Reels（9:16）</button>
     <button class="format-modal-btn" id="pickSquare">方形（1:1）</button>
     <button class="format-modal-cancel" id="pickCancel">取消</button>
@@ -1197,8 +1232,8 @@ document.getElementById('nameInput').addEventListener('keydown', (e)=>{
 const SITE_URL = 'https://gemmagemini.github.io/greek-name-generator/';
 
 const shareFormats = {
-  story: {width:400, height: Math.round(400*1920/1080), label:"限動／Reels"},
-  square: {width:400, height:400, label:"訊息／方形"}
+  story: {width:1080, height:1920, label:"限動／Reels"},
+  square: {width:1080, height:1080, label:"訊息／方形"}
 };
 
 async function captureCard(formatKey){
@@ -1207,32 +1242,38 @@ async function captureCard(formatKey){
     return null;
   }
   const fmt = shareFormats[formatKey] || shareFormats.square;
-  const source = document.getElementById('shareCard');
-  const temp = document.createElement('div');
-  temp.className = 'share-card';
-  temp.style.position = 'fixed';
-  temp.style.left = '-9999px';
-  temp.style.top = '0';
-  temp.style.width = fmt.width + 'px';
-  temp.style.height = fmt.height + 'px';
-  temp.style.aspectRatio = 'auto';
-  temp.innerHTML = source.innerHTML;
-  document.body.appendChild(temp);
+  const node = document.getElementById('shareCard');
+  const originalStyle = node.getAttribute('style') || '';
+  const noExportEls = node.querySelectorAll('.no-export');
+  noExportEls.forEach(el => el.style.visibility = 'hidden');
+
+  node.style.position = 'fixed';
+  node.style.top = '0';
+  node.style.left = '0';
+  node.style.zIndex = '2000';
+  node.style.width = Math.round(fmt.width/2.7) + 'px';
+  node.style.height = Math.round(fmt.height/2.7) + 'px';
+  node.style.aspectRatio = 'auto';
+  node.style.margin = '0';
+
   if(document.fonts && document.fonts.ready){
     try{ await document.fonts.ready; }catch(e){}
   }
   await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
   try{
-    const canvas = await html2canvas(temp, {
+    const canvas = await html2canvas(node, {
       backgroundColor: '#EADFC4',
-      scale: 1080 / fmt.width,
+      scale: 2.7,
       useCORS: true,
       allowTaint: false
     });
-    document.body.removeChild(temp);
+    node.setAttribute('style', originalStyle);
+    noExportEls.forEach(el => el.style.visibility = '');
     return canvas;
   }catch(err){
-    document.body.removeChild(temp);
+    node.setAttribute('style', originalStyle);
+    noExportEls.forEach(el => el.style.visibility = '');
     console.error('html2canvas failed:', err);
     alert('截圖失敗了，可能是網路或瀏覽器限制造成的，可以試試看重新整理頁面，或直接對這個結果卡截圖分享');
     return null;
@@ -1272,37 +1313,11 @@ async function doDownload(formatKey){
   }
 }
 
-const formatModalOverlay = document.getElementById('formatModalOverlay');
-
-document.getElementById('downloadBtn').addEventListener('click', ()=>{
-  formatModalOverlay.classList.add('show');
-});
-
-document.getElementById('pickStory').addEventListener('click', ()=>{
-  formatModalOverlay.classList.remove('show');
-  doDownload('story');
-});
-
-document.getElementById('pickSquare').addEventListener('click', ()=>{
-  formatModalOverlay.classList.remove('show');
-  doDownload('square');
-});
-
-document.getElementById('pickCancel').addEventListener('click', ()=>{
-  formatModalOverlay.classList.remove('show');
-});
-
-formatModalOverlay.addEventListener('click', (e)=>{
-  if(e.target === formatModalOverlay){
-    formatModalOverlay.classList.remove('show');
-  }
-});
-
-document.getElementById('shareBtn').addEventListener('click', async ()=>{
+async function doShare(formatKey){
   const nameText = document.getElementById('outName').textContent || 'greek-name';
   const titleZh = document.getElementById('outLineZh').textContent || '';
   const shareText = `我的希臘名字是 ${nameText}，${titleZh}\n點這裡找尋你的希臘名字：${SITE_URL}`;
-  const canvas = await captureCard('square');
+  const canvas = await captureCard(formatKey);
   if(!canvas) return;
   const blob = await canvasToBlob(canvas);
   if(!blob){
@@ -1329,7 +1344,57 @@ document.getElementById('shareBtn').addEventListener('click', async ()=>{
   link.href = canvas.toDataURL('image/png');
   link.click();
   alert('這個瀏覽器不支援直接分享，圖片已經幫你下載，可以手動上傳到 Instagram / Facebook / Threads');
+}
+
+const formatModalOverlay = document.getElementById('formatModalOverlay');
+let pendingAction = 'download';
+
+document.getElementById('downloadBtn').addEventListener('click', ()=>{
+  pendingAction = 'download';
+  formatModalOverlay.classList.add('show');
 });
+
+document.getElementById('shareBtn').addEventListener('click', ()=>{
+  pendingAction = 'share';
+  formatModalOverlay.classList.add('show');
+});
+
+document.getElementById('pickStory').addEventListener('click', ()=>{
+  formatModalOverlay.classList.remove('show');
+  if(pendingAction === 'download') doDownload('story');
+  else doShare('story');
+});
+
+document.getElementById('pickSquare').addEventListener('click', ()=>{
+  formatModalOverlay.classList.remove('show');
+  if(pendingAction === 'download') doDownload('square');
+  else doShare('square');
+});
+
+document.getElementById('pickCancel').addEventListener('click', ()=>{
+  formatModalOverlay.classList.remove('show');
+});
+
+formatModalOverlay.addEventListener('click', (e)=>{
+  if(e.target === formatModalOverlay){
+    formatModalOverlay.classList.remove('show');
+  }
+});
+
+if('speechSynthesis' in window){
+  document.getElementById('pronounceBtn').addEventListener('click', ()=>{
+    const nameText = document.getElementById('outName').textContent;
+    if(!nameText || nameText === '—') return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(nameText);
+    utter.lang = 'en-US';
+    utter.rate = 0.85;
+    window.speechSynthesis.speak(utter);
+  });
+} else {
+  const btn = document.getElementById('pronounceBtn');
+  if(btn) btn.style.display = 'none';
+}
 </script>
 </body>
 </html>
