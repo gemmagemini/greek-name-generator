@@ -1211,16 +1211,16 @@ async function captureCard(formatKey){
   const temp = document.createElement('div');
   temp.className = 'share-card';
   temp.style.position = 'fixed';
-  temp.style.left = '0';
+  temp.style.left = '-9999px';
   temp.style.top = '0';
-  temp.style.opacity = '0';
-  temp.style.pointerEvents = 'none';
-  temp.style.zIndex = '-1';
   temp.style.width = fmt.width + 'px';
   temp.style.height = fmt.height + 'px';
   temp.style.aspectRatio = 'auto';
   temp.innerHTML = source.innerHTML;
   document.body.appendChild(temp);
+  if(document.fonts && document.fonts.ready){
+    try{ await document.fonts.ready; }catch(e){}
+  }
   await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
   try{
     const canvas = await html2canvas(temp, {
