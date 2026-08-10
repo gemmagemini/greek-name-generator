@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>希臘名字產生器</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Serif+TC:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root{
+    --papyrus:#F3E9D2;
+    --papyrus-2:#EADFC4;
+    --ink:#2B1B12;
+    --ink-soft:#5B4632;
+    --terracotta:#BE4E2A;
+    --terracotta-deep:#9A3A1C;
+    --gold:#A97C3B;
+    --gold-line: rgba(169,124,59,0.45);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--papyrus);
+    font-family:'Noto Serif TC', serif;
+    color:var(--ink);
+    padding:48px 20px 64px;
+    display:flex;
+    justify-content:center;
+  }
+  .wrap{
+    width:100%;
+    max-width:560px;
+  }
+  .eyebrow{
+    text-align:center;
+    letter-spacing:0.35em;
+    font-size:12px;
+    color:var(--gold);
+    margin-bottom:10px;
+    text-transform:uppercase;
+  }
+  h1{
+    text-align:center;
+    font-size:28px;
+    font-weight:700;
+    margin:0 0 6px;
+  }
+  .sub{
+    text-align:center;
+    font-size:14px;
+    color:var(--ink-soft);
+    margin:0 0 32px;
+    line-height:1.7;
+  }
+  .key-divider{
+    display:flex;
+    justify-content:center;
+    margin:16px auto 28px;
+    opacity:0.65;
+  }
+  .card{
+    background:var(--papyrus-2);
+    border:1px solid var(--gold-line);
+    border-radius:4px;
+    padding:32px 28px;
+  }
+  label{
+    display:block;
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+  }
+  input[type=text]{
+    width:100%;
+    font-family:'Noto Serif TC', serif;
+    font-size:18px;
+    padding:12px 14px;
+    background:var(--papyrus);
+    border:1px solid var(--gold-line);
+    border-radius:3px;
+    color:var(--ink);
+    outline:none;
+  }
+  input[type=text]:focus{
+    border-color:var(--terracotta);
+  }
+  .mode-row{
+    display:flex;
+    gap:10px;
+    margin-top:20px;
+  }
+  .mode-btn{
+    flex:1;
+    padding:14px 8px;
+    font-family:'Noto Serif TC', serif;
+    font-size:15px;
+    font-weight:600;
+    text-align:center;
+    border-radius:3px;
+    border:1px solid var(--terracotta);
+    background:var(--papyrus);
+    color:var(--terracotta-deep);
+    cursor:pointer;
+  }
+  .mode-btn small{
+    display:block;
+    font-weight:400;
+    font-size:11px;
+    color:var(--ink-soft);
+    margin-top:3px;
+  }
+  .mode-btn:hover{
+    background:var(--terracotta);
+    color:var(--papyrus);
+  }
+  .mode-btn:hover small{
+    color:var(--papyrus);
+    opacity:0.85;
+  }
+  .result{
+    margin-top:32px;
+    text-align:center;
+    display:none;
+  }
+  .result.show{
+    display:block;
+  }
+  .result .name{
+    font-family:'Cinzel', serif;
+    font-size:32px;
+    font-weight:700;
+    color:var(--terracotta-deep);
+    letter-spacing:0.02em;
+    line-height:1.3;
+    word-break:break-word;
+  }
+  .result .line-en{
+    font-family:'Cinzel', serif;
+    font-size:14px;
+    color:var(--ink-soft);
+    letter-spacing:0.06em;
+    margin-top:12px;
+  }
+  .result .line-zh{
+    font-size:16px;
+    color:var(--ink);
+    margin-top:6px;
+    font-weight:600;
+  }
+  .result .etymology{
+    font-size:12.5px;
+    color:var(--gold);
+    margin-top:10px;
+    font-style:italic;
+  }
+  .result .patron{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-top:14px;
+    padding-top:14px;
+    border-top:1px dashed var(--gold-line);
+  }
+  .share-card{
+    padding:4px;
+  }
+  .reroll{
+    width:100%;
+    margin-top:36px;
+    padding:13px 8px;
+    font-family:'Noto Serif TC', serif;
+    font-size:15px;
+    font-weight:600;
+    text-align:center;
+    background:var(--terracotta);
+    color:var(--papyrus);
+    border:1px solid var(--terracotta);
+    border-radius:3px;
+    cursor:pointer;
+  }
+  .reroll:hover{
+    background:var(--terracotta-deep);
+    border-color:var(--terracotta-deep);
+  }
+  .action-row{
+    display:flex;
+    gap:10px;
+    margin-top:12px;
+  }
+  .action-btn{
+    flex:1;
+    padding:12px 8px;
+    font-family:'Noto Serif TC', serif;
+    font-size:14px;
+    font-weight:600;
+    background:var(--papyrus);
+    color:var(--terracotta-deep);
+    border:1px solid var(--gold-line);
+    border-radius:3px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+  }
+  .action-btn:hover{
+    border-color:var(--terracotta);
+  }
+  .action-btn svg{
+    width:15px;
+    height:15px;
+    flex-shrink:0;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Ὀδύσσεια · 命名儀式</div>
+  <h1>你的希臘名字</h1>
+  <p class="sub">輸入你的英文名字，獲得專屬的希臘名字</p>
+
+  <div class="key-divider">
+    <svg width="160" height="14" viewBox="0 0 160 14">
+      <polyline points="0,7 10,7 10,0 20,0 20,14 30,14 30,0 40,0 40,7 50,7 50,0 60,0 60,14 70,14 70,0 80,0 80,7 90,7 90,0 100,0 100,14 110,14 110,0 120,0 120,7 130,7 130,0 140,0 140,14 150,14 150,0 160,0" fill="none" stroke="#A97C3B" stroke-width="1.5"/>
+    </svg>
+  </div>
+
+  <div class="card">
+    <label for="nameInput">英文名字</label>
+    <input type="text" id="nameInput" placeholder="例如 Gemma" maxlength="24">
+
+    <div class="mode-row">
+      <div class="reroll" id="nameBtn" style="margin-top:0;">請希臘諸神為我命名</div>
+    </div>
+
+    <div class="result" id="result">
+      <div class="share-card" id="shareCard">
+        <div class="name" id="outName">—</div>
+        <div class="line-en" id="outLineEn">—</div>
+        <div class="line-zh" id="outLineZh">—</div>
+        <div class="etymology" id="outEtymology"></div>
+        <div class="patron" id="outPatron"></div>
+      </div>
+
+      <button class="mode-btn" id="rerollBtn" style="width:100%; flex:none; margin-top:36px;">不喜歡這個名字，想看其他的</button>
+
+      <div class="action-row">
+        <button class="action-btn" id="downloadBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+          下載圖片
+        </button>
+        <button class="action-btn" id="shareBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.7l7.6-4.4M8.2 13.3l7.6 4.4"/></svg>
+          分享
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const maleNames = ["james","john","robert","michael","william","david","richard","joseph","thomas","charles","christopher","daniel","matthew","anthony","mark","donald","steven","paul","andrew","joshua","kenneth","kevin","brian","george","edward","ronald","timothy","jason","jeffrey","ryan","jacob","gary","nicholas","eric","jonathan","stephen","larry","justin","scott","brandon","benjamin","samuel","gregory","alexander","patrick","frank","raymond","jack","dennis","jerry","tyler","aaron","jose","henry","adam","douglas","nathan","peter","zachary","kyle","walter","harold","carl","arthur","gerald","roger","keith","jeremy","terry","lawrence","sean","christian","ethan","austin","joe","albert","jesse","willie","billy","bryan","bruce","ralph","roy","eugene","louis","philip","bobby","mason","wayne"];
+
+const femaleNames = ["mary","patricia","jennifer","linda","elizabeth","barbara","susan","jessica","sarah","karen","lisa","nancy","betty","margaret","sandra","ashley","kimberly","emily","donna","michelle","dorothy","carol","amanda","melissa","deborah","stephanie","rebecca","laura","sharon","cynthia","kathleen","amy","angela","shirley","anna","brenda","pamela","emma","nicole","helen","samantha","katherine","christine","debra","rachel","catherine","carolyn","janet","ruth","maria","heather","diane","virginia","julie","joyce","victoria","olivia","kelly","christina","lauren","joan","evelyn","judith","megan","andrea","cheryl","hannah","jacqueline","martha","gloria","teresa","ann","sara","madison","frances","kathryn","janice","jean","abigail","alice","julia","judy","sophia","grace","denise","amber","doris","marilyn","danielle","beverly","isabella","theresa","diana","natalie","gemma","chloe","charlotte","mia","ava"];
+
+const patronGodsMale = [
+  {en:"Zeus", zh:"宙斯", domainZh:"天空與雷電之王", domainEn:"the sky and thunder"},
+  {en:"Poseidon", zh:"波賽頓", domainZh:"海洋之神", domainEn:"the sea"},
+  {en:"Apollo", zh:"阿波羅", domainZh:"光明、音樂與預言之神", domainEn:"light, music and prophecy"},
+  {en:"Ares", zh:"阿瑞斯", domainZh:"戰爭之神", domainEn:"war"},
+  {en:"Hermes", zh:"赫米斯", domainZh:"商旅與信使之神", domainEn:"travel and messages"},
+  {en:"Hephaestus", zh:"赫菲斯托斯", domainZh:"鍛造與工藝之神", domainEn:"the forge and craft"},
+  {en:"Dionysus", zh:"戴歐尼修斯", domainZh:"酒與狂歡之神", domainEn:"wine and revelry"},
+  {en:"Hades", zh:"黑帝斯", domainZh:"冥界之神", domainEn:"the underworld"},
+  {en:"Helios", zh:"赫利歐斯", domainZh:"太陽神", domainEn:"the sun"},
+  {en:"Pan", zh:"潘", domainZh:"荒野與牧羊之神", domainEn:"the wild"}
+];
+
+const patronGodsFemale = [
+  {en:"Athena", zh:"雅典娜", domainZh:"智慧與戰略女神", domainEn:"wisdom and strategy"},
+  {en:"Aphrodite", zh:"阿芙蘿黛蒂", domainZh:"愛與美之女神", domainEn:"love and beauty"},
+  {en:"Artemis", zh:"阿蒂蜜絲", domainZh:"狩獵與月亮女神", domainEn:"the hunt and moon"},
+  {en:"Hera", zh:"赫拉", domainZh:"婚姻與家庭女神", domainEn:"marriage and family"},
+  {en:"Demeter", zh:"狄蜜特", domainZh:"豐收與大地女神", domainEn:"harvest and earth"},
+  {en:"Hestia", zh:"赫斯提亞", domainZh:"爐灶與家庭女神", domainEn:"hearth and home"},
+  {en:"Persephone", zh:"波瑟芬妮", domainZh:"冥后與春天女神", domainEn:"spring and the underworld"},
+  {en:"Nike", zh:"尼姬", domainZh:"勝利女神", domainEn:"victory"},
+  {en:"Iris", zh:"伊麗絲", domainZh:"彩虹與信使女神", domainEn:"the rainbow and messages"},
+  {en:"Eos", zh:"厄俄斯", domainZh:"黎明女神", domainEn:"the dawn"}
+];
+
+const tricksterGods = [
+  {en:"Hermes", zh:"赫米斯", tag:"詭計之神"},
+  {en:"Pan", zh:"潘", tag:"惡作劇的荒野之神"},
+  {en:"Dionysus", zh:"戴歐尼修斯", tag:"縱情與瘋狂之神"},
+  {en:"Eris", zh:"厄里斯", tag:"紛爭女神"},
+  {en:"Momus", zh:"摩摩斯", tag:"嘲諷之神"},
+  {en:"Priapus", zh:"普里阿普斯", tag:"滑稽豐饒之神"},
+  {en:"Comus", zh:"科摩斯", tag:"狂歡之神"},
+  {en:"Prometheus", zh:"普羅米修斯", tag:"機巧的泰坦神"},
+  {en:"Circe", zh:"喀耳刻", tag:"迷魅的巫術女神"},
+  {en:"Aphrodite", zh:"阿芙蘿黛蒂", tag:"善於算計的愛與美之神"}
+];
+
+const funnyDomains = [
+  ["bubbles and soap","泡泡與肥皂"],
+  ["midnight snacks","宵夜"],
+  ["lost socks","走失的襪子"],
+  ["overthinking","想太多"],
+  ["backseat driving","後座指揮"],
+  ["playlist curation","歌單策展"],
+  ["unnecessary detours","不必要的繞路"],
+  ["spicy food","辣的食物"],
+  ["procrastination","拖延症"],
+  ["houseplants","陽台盆栽"],
+  ["one more episode","再看一集"],
+  ["parallel parking","路邊停車"],
+  ["strong wifi","強力wifi"],
+  ["perfectly ripe avocados","恰好熟成的酪梨"],
+  ["unread messages","已讀不回"],
+  ["emergency naps","緊急補眠"],
+  ["the last bite","最後一口"],
+  ["good hair days","完美髮型日"],
+  ["spontaneous road trips","說走就走的公路旅行"],
+  ["reheated coffee","回鍋咖啡"],
+  ["forgotten passwords","忘記的密碼"],
+  ["the group chat","群組聊天"],
+  ["snoozing alarms","按掉鬧鐘"],
+  ["spilled drinks","打翻的飲料"],
+  ["competitive board games","好勝的桌遊之夜"],
+  ["3am deep thoughts","凌晨三點的哲學思考"],
+  ["tiny dogs with big attitudes","氣勢驚人的小型犬"],
+  ["free samples","試吃試用"],
+  ["oversleeping","賴床"],
+  ["existential dread before coffee","咖啡前的存在危機"],
+  ["autocorrect fails","自動校正災難"],
+  ["mismatched socks","不成對的襪子"],
+  ["the last parking spot","最後一個停車位"],
+  ["ordering dessert first","先點甜點"],
+  ["unnecessary group photos","非必要合照"],
+  ["overpacking for short trips","短程旅行帶太多行李"],
+  ["snack hoarding","囤零食"],
+  ["talking to pets like people","跟寵物講人話"],
+  ["losing at rock paper scissors","猜拳輸家"],
+  ["the snooze button","貪睡鬧鐘"],
+  ["overthinking texts","訊息回覆前糾結"],
+  ["stealing the blanket","搶棉被"],
+  ["forgetting why you walked into a room","忘記進房間要幹嘛"],
+  ["impulse online shopping","衝動網購"],
+  ["singing in the shower","洗澡唱歌"],
+  ["unnecessary competitiveness","非必要好勝心"],
+  ["the perfect nap","完美的午睡"],
+  ["untangling headphone wires","解開耳機線"],
+  ["overanalyzing horoscopes","過度解讀星座運勢"],
+  ["hoarding plastic bags","囤積塑膠袋"],
+  ["being fashionably late","習慣性遲到"],
+  ["arguing with GPS","跟導航吵架"]
+];
+
+const suffixMale = ["os","ios","on","andros","eus","itos","onas","ander","ippos","phon","ykos","orion","atos","enios","ophon","agon","stheus","phanes","kritos","machos"];
+const suffixFemale = ["ia","ora","ene","itha","andra","eia","ysia","antha","nessa","nayus","opeia","yris","adne","othea","itia","ymna","phia","lysia","ronia","ystine"];
+const suffixNeutral = suffixMale.slice(0,10).concat(suffixFemale.slice(0,10));
+const connectors = ["n","r","l","s"];
+const vowels = "aeiou";
+
+const playfulModifiers = [
+  ["Suspiciously Shiny","可疑閃亮的"],
+  ["Mysteriously Overflowing","神秘滿溢的"],
+  ["Accidentally Excessive","不小心太多的"],
+  ["Stubbornly Cheerful","固執開朗的"],
+  ["Chronically Dramatic","習慣性小題大作的"],
+  ["Unnecessarily Competitive","非必要好勝的"],
+  ["A Little Too Proud","有點太得意的"],
+  ["Chronically Late","習慣性遲到的"],
+  ["Overly Confident","過度自信的"]
+];
+
+const godTheme = {
+  "Hephaestus":"precious", "Plutus":"precious",
+  "Athena":"wisdom",
+  "Ares":"battle",
+  "Aphrodite":"love", "Eros":"love", "Hebe":"love",
+  "Zeus":"rule",
+  "Poseidon":"sea",
+  "Apollo":"light", "Helios":"light",
+  "Demeter":"harvest", "Persephone":"harvest",
+  "Hestia":"hearth",
+  "Hera":"marriage",
+  "Artemis":"hunt",
+  "Nike":"victory",
+  "Themis":"justice",
+  "Hermes":"trickster",
+  "Nyx":"night", "Selene":"night", "Hypnos":"night", "Morpheus":"night", "Chronos":"night",
+  "Tyche":"luck",
+  "Atlas":"burden",
+  "Mnemosyne":"memory",
+  "Dionysus":"party",
+  "Iris":"message", "Calliope":"message",
+  "Eirene":"peace",
+  "Charites":"grace",
+  "Gaia":"earth",
+  "Eos":"dawn",
+  "Psyche":"soul"
+};
+
+const fallbackOnlyGods = ["Erebus","Hemera","Hecate","Nemesis","Thalassa","Boreas","Notos","Zephyrus","Physis","Ker","Metis","Harmonia"];
+
+const fallbackGodTheme = {
+  "Erebus":"shadowmystery",
+  "Hemera":"wakeworld",
+  "Hecate":"magic",
+  "Nemesis":"reckoning",
+  "Thalassa":"tide",
+  "Boreas":"windchill",
+  "Notos":"south",
+  "Zephyrus":"west",
+  "Physis":"nature",
+  "Ker":"fate",
+  "Metis":"foresight",
+  "Harmonia":"harmony"
+};
+
+const themedModifiers = {
+  precious: [["Suspiciously Organized","可疑的井井有條"],["Secretly Hoarding","偷偷囤貨的"],["Excessively Polished","過度拋光的"],["Quietly Possessive","悄悄佔有慾強的"],["Never Not Sparkling","從不失去光澤的"],["A Bit Too Attached To Labels","對標籤有點太執著的"],["Quietly Cataloguing Everything","默默把一切分類建檔的"],["Suspiciously Good At Wrapping Gifts","可疑地很會包裝禮物的"]],
+  wisdom: [["Overly Prepared","準備過頭的"],["Chronically Overthinking","想太多的"],["Unsolicited-Advice-Giving","愛給建議的"],["Always Right, Allegedly","自稱永遠是對的"],["Suspiciously Good At Trivia","可疑地很會冷知識的"],["Citing Sources Nobody Asked For","沒人問也要引用出處的"],["Color-Coding Everything","什麼都要用顏色分類的"],["Quietly Correcting Grammar","默默糾正文法的"]],
+  battle: [["Unnecessarily Competitive","非必要好勝的"],["Chronically Dramatic","習慣性小題大作的"],["Ready To Fight About It","隨時準備吵架的"],["Never Backing Down","永不退讓的"],["Loudly Determined","大聲堅持己見的"],["Turning Small Talk Into A Debate","把閒聊變辯論的"],["Suspiciously Good At Winning Arguments","可疑地很會吵贏架的"],["Never Letting Things Go","從不放下事情的"]],
+  love: [["Dangerously Charming","危險地有魅力的"],["Chronically Lovestruck","習慣性戀愛腦的"],["A Little Too Confident","有點太有自信的"],["Hopelessly Devoted","無可救藥地深情的"],["Perpetually Glowing","總是容光煥發的"],["Sending Too Many Heart Emojis","愛心表情符號用太多的"],["Suspiciously Good At Flirting","可疑地很會撩人的"],["Falling In Love With The Idea Of Love","愛上戀愛本身的"]],
+  rule: [["Unnecessarily Bossy","非必要愛下指令的"],["Self-Importantly Certain","過度自信自己是對的"],["Chronically In Charge","習慣性當老大的"],["Grandly Dramatic","隆重小題大作的"],["Never Wrong, Just Ask Them","從不認錯（問他就知道）的"],["Rearranging Furniture Without Asking","沒問就重新擺家具的"],["Suspiciously Good At Delegating","可疑地很會分派工作的"],["Announcing Plans Like Decrees","把計畫講得像聖旨的"]],
+  sea: [["Unpredictably Moody","陰晴不定的"],["Dramatically Emotional","戲劇化多愁善感的"],["Prone To Sudden Storms","容易突然爆走的"],["Deeply Mysterious, Allegedly","自稱深不可測的"],["Randomly Emotional At 2am","凌晨兩點突然emo的"],["Suspiciously Good At Disappearing For A Bit","可疑地很會突然消失一下的"],["Changing Moods Like The Tide","情緒像潮汐一樣說變就變的"],["Never Explaining The Mood Swing","從不解釋自己情緒轉變的"]],
+  light: [["A Little Too Radiant","有點太耀眼的"],["Perfectionist About Everything","什麼都要求完美的"],["Always Center Stage","總是搶鏡的"],["Suspiciously Talented","可疑地多才多藝的"],["Needs To Be Seen Doing It","一定要被看到在做的"],["Suspiciously Photogenic","可疑地很上相的"],["Turning Every Room Brighter, Allegedly","自稱能讓每個房間都變亮的"],["Winning Just By Showing Up","光是出現就贏了的"]],
+  harvest: [["Overly Concerned About Snacks","過度在意有沒有吃飽的"],["Fussily Nurturing","囉唆地照顧人的"],["Endlessly Feeding People","不斷餵食眾人的"],["Secretly Controlling The Thermostat","偷偷控制冷氣溫度的"],["Always Has Snacks On Hand","隨身總是帶著零食的"],["Suspiciously Good At Meal Prep","可疑地很會備餐的"],["Insisting Everyone Eat More","堅持大家要多吃一點的"],["Growing Something On The Balcony","陽台一定種著什麼的"]],
+  hearth: [["Suspiciously Cozy","可疑地舒適的"],["Never Leaving The Couch","絕不離開沙發的"],["Quietly Domestic","悄悄很顧家的"],["Overly Attached To Their Blanket","對自己毯子過度依戀的"],["Suspiciously Good At Naps","可疑地很會睡午覺的"],["Turning Down Plans For The Couch","為了沙發推掉邀約的"],["Suspiciously Good At Making Tea","可疑地很會泡茶的"],["Rearranging Cushions For No Reason","沒事就在調整抱枕的"]],
+  marriage: [["Status-Obsessed","太在意排場的"],["Quietly Judgmental","悄悄在心裡評分的"],["Fiercely Possessive","強烈佔有慾的"],["Keeping Score","默默在記帳的"],["Suspiciously Good At Planning Events","可疑地很會辦活動的"],["Remembering Every Anniversary But Their Own","記得所有紀念日除了自己的"],["Quietly Rating Everyone's Relationship","默默給每對關係打分數的"],["Suspiciously Good At Seating Charts","可疑地很會排座位表的"]],
+  hunt: [["Fiercely Independent","超級獨立的"],["Allergic To Small Talk","對閒聊過敏的"],["Competitive About Everything","什麼都要比的"],["Never Asks For Directions","從不問路的"],["Suspiciously Good At Disappearing","可疑地很會消失的"],["Preferring The Company Of Animals","比較喜歡動物陪伴的"],["Suspiciously Good At Packing Light","可疑地很會輕裝出行的"],["Never Explaining Where They've Been","從不解釋自己去哪了的"]],
+  victory: [["Suspiciously Competitive","可疑地好勝的"],["Never Satisfied With Silver","絕不接受銀牌的"],["Overachieving Unprompted","沒人要求也要拿第一的"],["Turning Everything Into A Contest","什麼都要比賽的"],["Suspiciously Good At Trivia","可疑地很會冷知識搶答的"],["Keeping A Mental Scoreboard","心裡默默計分的"],["Never Settling For Second","絕不接受第二名的"],["Suspiciously Good At Board Games","可疑地很會桌遊的"]],
+  justice: [["Quietly Judging Your Choices","默默評判你選擇的"],["A Stickler For The Rules","龜毛守規矩的"],["Ready With A Lecture","隨時準備說教的"],["Fact-Checking Group Chats","在群組裡查證事實的"],["Suspiciously Fair About Everything","可疑地對什麼都很公平的"],["Reading The Terms And Conditions","真的會看條款細則的"],["Suspiciously Good At Mediating","可疑地很會調解糾紛的"],["Quietly Keeping Receipts","默默留著證據的"]],
+  trickster: [["Suspiciously Persuasive","可疑地會說服人的"],["A Little Too Smooth","有點太會來的"],["Always Has An Excuse","永遠有藉口的"],["Suspiciously Good At Excuses","可疑地很會找藉口的"],["Never Caught Red-Handed","從沒被抓到過的"],["Suspiciously Good At Negotiating","可疑地很會談判的"],["Talking Their Way Out Of Anything","什麼都能講到脫身的"],["Suspiciously Good At Reading People","可疑地很會看穿別人的"]],
+  night: [["Chronically Nocturnal","習慣性夜貓子的"],["Mysteriously Sleep-Deprived","神秘地睡眠不足的"],["Prone To Vivid Daydreams","容易做白日夢的"],["Suspiciously Awake At 3am","凌晨三點還醒著的"],["Allergic To Morning Meetings","對早會過敏的"],["Suspiciously Productive After Midnight","過午夜後異常有效率的"],["Never Setting An Alarm Before Noon","中午前從不設鬧鐘的"],["Suspiciously Good At Stargazing","可疑地很會看星星的"]],
+  luck: [["Suspiciously Lucky","可疑地幸運的"],["Always Finds A Parking Spot","永遠找得到車位的"],["Winning Raffles They Forgot They Entered","忘記自己有參加還中獎的"],["Suspiciously Good Timing","可疑地時機抓得剛好的"],["Never Missing The Bus","從沒錯過公車的"],["Suspiciously Good At Finding Money In Old Coats","可疑地很會在舊外套找到錢的"],["Always Getting Upgraded","總是被升等的"],["Suspiciously Good At Scratch Cards","可疑地很會刮刮樂的"]],
+  burden: [["Secretly Enjoying The Suffering","偷偷樂在其中地受苦的"],["Always Carrying Everyone's Stuff","總是幫大家扛東西的"],["Volunteering Before Being Asked","還沒被拜託就先舉手的"],["Suspiciously Good At Carrying Groceries","可疑地很會扛東西的"],["Never Complaining, Allegedly","自稱從不抱怨的"],["Suspiciously Good At Moving Furniture","可疑地很會搬家具的"],["Taking On Everyone's Emotional Baggage","接收所有人情緒包袱的"],["Suspiciously Strong Grip","可疑地握力很強的"]],
+  memory: [["Ironically Forgetful","諷刺地健忘的"],["Endlessly Nostalgic","沒完沒了懷舊的"],["Remembering Everyone's Birthday But Their Own","記得所有人生日除了自己的"],["Suspiciously Good At Trivia Night","可疑地很會猜謎之夜的"],["Reliving Old Stories On Loop","反覆重講同一個故事的"],["Suspiciously Good At Old Song Lyrics","可疑地很會唱老歌歌詞的"],["Never Forgetting A Grudge","從不忘記過節的"],["Suspiciously Good At Faces, Bad At Names","很會認臉但記不住名字的"]],
+  party: [["Suspiciously Good At Karaoke","可疑地很會唱KTV的"],["Always Down For One More Round","永遠可以再一輪的"],["Suspiciously Good At Planning Parties","可疑地很會辦派對的"],["Never The First To Leave","從不第一個走的"],["Always Has A Speaker Ready","隨時都準備好音響的"],["Suspiciously Good At Karaoke Song Choice","可疑地很會選KTV歌單的"],["Starting The Dance Floor","第一個下去跳舞的"],["Suspiciously Good At Making Playlists","可疑地很會做歌單的"]],
+  message: [["Always First With The Gossip","總是第一個知道八卦的"],["Dramatically Oversharing","戲劇化地什麼都說的"],["Replying With Voice Messages","習慣用語音訊息回覆的"],["Suspiciously Fast At Typing","可疑地打字很快的"],["Screenshotting Everything","什麼都要截圖的"],["Suspiciously Good At Reading The Room","可疑地很會察言觀色的"],["Leaving Messages On Read For Days","已讀好幾天才回的"],["Suspiciously Good At Group Chat Drama","可疑地很懂群組八卦的"]],
+  peace: [["Suspiciously Chill About Everything","可疑地什麼都很淡定的"],["Avoids Conflict At All Costs","不惜一切避免衝突的"],["Suspiciously Good At Small Talk","可疑地很會閒聊的"],["Always The Mediator","總是當和事佬的"],["Changing The Subject On Cue","總是準時轉移話題的"],["Suspiciously Good At De-escalating","可疑地很會降溫的"],["Never Picking A Side","從不選邊站的"],["Suspiciously Calm In Traffic","可疑地塞車也很淡定的"]],
+  grace: [["Suspiciously Flattering","可疑地很會稱讚人的"],["Effortlessly Charming, Allegedly","自稱毫不費力有魅力的"],["Suspiciously Good At Compliments","可疑地很會稱讚人的"],["Never Runs Out Of Kind Words","好話從不缺的"],["Making Everyone Feel Special","讓每個人都覺得自己很特別的"],["Suspiciously Good At Small Gestures","可疑地很會做小驚喜的"],["Remembering How You Take Your Coffee","記得你咖啡怎麼點的"],["Suspiciously Good At First Impressions","可疑地第一印象總是很好的"]],
+  earth: [["Stubbornly Grounded","固執地腳踏實地的"],["Never Wrong About Directions","方向感從來沒錯過的"],["Suspiciously Good With Plants","可疑地很會種植物的"],["Always Has A Backup Plan","總是有備案的"],["Never Late To Anything Important","重要的事從不遲到的"],["Suspiciously Good At Fixing Things","可疑地很會修東西的"],["Insisting On Doing It Themselves","堅持自己來的"],["Suspiciously Calm During Chaos","混亂中異常冷靜的"]],
+  dawn: [["Aggressively A Morning Person","積極過頭的早起人"],["Suspiciously Chipper Before 8am","早上八點前就異常有活力的"],["Suspiciously Productive Before Noon","中午前異常有效率的"],["Judging Everyone Still Asleep","默默評判還在睡的人的"],["Never Needs An Alarm","從不用鬧鐘的"],["Suspiciously Cheerful At Sunrise","日出時異常開心的"],["Already Showered By 7am","七點前就洗好澡的"],["Suspiciously Good At Making Breakfast","可疑地很會做早餐的"]],
+  soul: [["Overanalyzing Their Own Feelings","過度分析自己心情的"],["Deep In Their Feelings","深陷在情緒裡的"],["Suspiciously Good At Journaling","可疑地很會寫日記的"],["Reading Into Everything","什麼都要過度解讀的"],["Quoting Therapy Speak Unprompted","沒事就用心理學術語的"],["Suspiciously Good At Deep Conversations","可疑地很會聊很深的的"],["Analyzing Their Dreams At Breakfast","早餐時間分析自己的夢的"],["Suspiciously Good At Naming Their Feelings","可疑地很會為情緒命名的"]],
+  shadowmystery: [["Suspiciously Hard To Read","可疑地讓人猜不透的"],["Never Explaining Themselves","從不解釋自己的"],["Quietly Watching From The Corner","總是安靜待在角落觀察的"],["Suspiciously Good At Vanishing From Group Photos","可疑地總在合照裡消失的"],["Keeping Secrets Just Because","沒理由也要保守秘密的"],["Suspiciously Calm In The Dark","在黑暗中異常鎮定的"],["Never Answering A Question Directly","從不正面回答問題的"],["Suspiciously Good At Poker Face","可疑地撲克臉很強的"]],
+  wakeworld: [["Suspiciously Productive At Sunrise","日出時異常有效率的"],["Never Missing A Morning Routine","從不錯過晨間例行公事的"],["Suspiciously Cheerful For No Reason","沒理由也異常開朗的"],["Always Opening The Curtains First","總是第一個拉開窗簾的"],["Suspiciously Good At Pep Talks","可疑地很會打氣的"],["Waking Up Everyone Else Too","順便也把大家叫醒的"],["Suspiciously Optimistic About Traffic","對塞車異常樂觀的"],["Never Hitting Snooze","從不按貪睡鍵的"]],
+  magic: [["Suspiciously Good At Reading The Room","可疑地很會讀空氣的"],["Never Explaining How They Knew","從不解釋自己怎麼知道的"],["Suspiciously Good At Finding Lost Things","可疑地很會找到不見的東西的"],["Turning Up Right When Needed","總是剛好在需要時出現的"],["Suspiciously Good At Guessing Passwords","可疑地很會猜密碼的"],["Knowing Things They Shouldn't","知道不該知道的事的"],["Suspiciously Convincing","可疑地很有說服力的"],["Never Getting Lost, Allegedly","自稱從不迷路的"]],
+  reckoning: [["Suspiciously Good At Karma","可疑地很懂因果報應的"],["Never Forgetting Who Owes What","從不忘記誰欠了什麼的"],["Suspiciously Fair In The End","最後總是很公平的"],["Keeping A Very Long Memory","記性特別長久的"],["Suspiciously Good Timing For Payback","報應時機抓得剛好的"],["Balancing The Scales Quietly","默默把天秤扳回來的"],["Never Letting Anyone Get Away With It","從不讓人輕易脫身的"],["Suspiciously Satisfied When Justice Happens","正義降臨時異常滿足的"]],
+  tide: [["Coming And Going On Their Own Schedule","來去都照自己的步調的"],["Suspiciously Calm Before The Storm","風暴前異常平靜的"],["Never Quite Settling In One Place","從不真正定在一個地方的"],["Suspiciously Good At Reading The Room's Mood","可疑地很會察覺氣氛變化的"],["Pulling Away Just As You Get Close","一靠近就悄悄後退的"],["Suspiciously Rhythmic About Everything","什麼都有自己節奏的"],["Never The Same Twice","每次都不太一樣的"],["Suspiciously Deep, Allegedly","自稱深不見底的"]],
+  windchill: [["Suspiciously Hard To Pin Down","可疑地讓人抓不住的"],["Always Changing Direction","總是說變就變的"],["Suspiciously Good At Making An Entrance","可疑地很會登場的"],["Never Sticking Around Too Long","從不停留太久的"],["Suspiciously Cool Under Pressure","壓力下異常冷靜的"],["Sweeping In Unannounced","總是不聲不響就出現的"],["Suspiciously Bracing","可疑地讓人一凜的"],["Never Explaining The Sudden Chill","從不解釋那陣突然的涼意的"]],
+  south: [["Suspiciously Warm-Hearted","可疑地熱心過頭的"],["Never Quite Predictable","從不按牌理出牌的"],["Suspiciously Good At Small Weather Talk","可疑地很會聊天氣的"],["Blowing Hot And Cold","忽冷忽熱的"],["Suspiciously Good At Changing Plans Last Minute","可疑地很會臨時改計畫的"],["Never Staying One Temperature","情緒從不維持同一個溫度的"],["Suspiciously Breezy About Deadlines","對截止日期異常輕鬆的"],["Arriving With No Warning","總是毫無預警就出現的"]],
+  west: [["Suspiciously Gentle Until Suddenly Not","溫和到突然翻臉的"],["Never Announcing A Mood Change","情緒轉變從不預告的"],["Suspiciously Good At Drifting Off Topic","可疑地很會扯遠的"],["Carrying Rumors Further Than Intended","八卦傳得比預期還遠的"],["Suspiciously Soothing, Allegedly","自稱很療癒的"],["Never Blowing The Same Way Twice","從不吹同一個方向兩次的"],["Suspiciously Good At Cooling Things Down","可疑地很會降溫氣氛的"],["Arriving Just In Time To Change The Mood","總是剛好在氣氛尷尬時出現改變氣氛的"]],
+  nature: [["Suspiciously Good At Growing Things","可疑地很會種東西的"],["Never Explaining Their Green Thumb","從不解釋自己怎麼種什麼活什麼的"],["Suspiciously Calm About Chaos","面對混亂異常淡定的"],["Growing Back Stronger After Setbacks","挫折後總是長得更好的"],["Suspiciously Good At Adapting","可疑地很會適應環境的"],["Never Rushing Anything","從不急著做任何事的"],["Suspiciously Patient","可疑地有耐心的"],["Quietly Taking Over The Whole Garden","不知不覺就佔滿整個花園的"]],
+  fate: [["Suspiciously Good At Predicting Outcomes","可疑地很會預測結果的"],["Never Surprised By Plot Twists","從不對轉折感到意外的"],["Suspiciously Calm About The Inevitable","面對必然的事異常鎮定的"],["Always Knowing How It Ends","總是知道結局的"],["Suspiciously Good At I-Told-You-So","可疑地很愛說「我早就說了」的"],["Never Fighting The Outcome","從不掙扎結果的"],["Suspiciously Accepting","可疑地很豁達的"],["Quietly Writing Everyone's Ending","默默替大家寫好結局的"]],
+  foresight: [["Overplanning Every Possible Scenario","把所有可能情境都計劃好的"],["Suspiciously Good At Worst-Case Thinking","可疑地很會想最壞情況的"],["Never Being Caught Off Guard","從不被打得措手不及的"],["Suspiciously Good At Packing For Anything","可疑地什麼都準備好的"],["Three Steps Ahead, Allegedly","自稱總是超前部署的"],["Suspiciously Good At Reading Between Lines","可疑地很會讀空氣的"],["Never Improvising","從不臨場發揮的"],["Suspiciously Good At Backup Plans For Backup Plans","備案的備案都準備好的"]],
+  harmony: [["Suspiciously Good At Keeping The Peace","可疑地很會維持和平的"],["Never Letting A Silence Stay Awkward","從不讓沉默尷尬太久的"],["Suspiciously Good At Reading The Room's Playlist","可疑地很會抓場子氛圍的"],["Balancing Everyone's Moods At Once","同時安撫所有人情緒的"],["Suspiciously Good At Compromise","可疑地很會折衷的"],["Never Picking Favorites, Allegedly","自稱從不偏心的"],["Suspiciously Good At Making Everyone Feel Heard","可疑地讓每個人都覺得被聽見的"],["Quietly Fixing The Vibe","默默把氣氛修好的"]],
+  blessing: [["Suspiciously Grateful For Everything","可疑地對什麼都心懷感恩的"],["Never Explaining Their Good Luck","從不解釋自己怎麼這麼幸運的"],["Suspiciously Good At Landing On Their Feet","可疑地總是安然落地的"],["Humble-Bragging About Being Chosen","謙虛地炫耀自己被選中的"],["Suspiciously Well Taken Care Of","可疑地被照顧得很好的"],["Never Having To Ask Twice","從不需要開口第二次的"],["Suspiciously Good Timing In Life","人生時機總是抓得剛好的"],["Quietly Assuming Things Will Work Out","默默相信事情會順利的"]],
+  exaltation: [["Suspiciously Certain Of Their Own Greatness","可疑地確信自己很偉大的"],["Never Blending Into The Background","從不甘於平凡的"],["Suspiciously Good At Making An Entrance","可疑地很會登場的"],["Quietly Expecting To Be Noticed","默默期待被注意到的"],["Suspiciously Comfortable With Compliments","對稱讚異常自在的"],["Never Doubting They're The Main Character","從不懷疑自己是主角的"],["Suspiciously Good At Being Remembered","可疑地讓人印象深刻的"],["Standing A Little Taller Than Necessary","站得比必要更挺的"]],
+  laurel: [["Suspiciously Good At Getting Credit","可疑地總是被記功的"],["Never Missing A Chance To Perform","從不錯過表演機會的"],["Suspiciously Poetic About Small Things","對小事都能講得很有詩意的"],["Quietly Collecting Compliments Like Trophies","默默把稱讚當獎盃收集的"],["Suspiciously Good At The Encore","可疑地很會安可的"],["Never Settling For An Understated Exit","從不低調退場的"],["Suspiciously Photogenic On Stage","舞台上異常上相的"],["Taking A Bow Even When Nobody Clapped","沒人鼓掌也要鞠躬的"]],
+  sacred: [["Suspiciously Good At Giving Advice Nobody Asked For","可疑地很會給沒人要的建議的"],["Never Doubting Their Own Instincts","從不懷疑自己直覺的"],["Suspiciously Calm During A Crisis","危機時刻異常鎮定的"],["Quietly Certain They Called It First","默默確信自己早就料到的"],["Suspiciously Good At Healing Awkward Silences","可疑地很會化解尷尬的"],["Never Explaining The Vision","從不解釋自己的直覺哪來的"],["Suspiciously Trusted With Secrets","可疑地大家都愛跟他說秘密的"],["Speaking In A Slightly Too Serious Tone","講話語氣總是有點太嚴肅的"]],
+  guardian: [["Suspiciously Overprotective","可疑地保護過頭的"],["Never Letting Anyone Walk Home Alone","從不讓人自己走回家的"],["Suspiciously Good At Showing Up Uninvited To Help","可疑地沒被叫就出現幫忙的"],["Quietly Checking Everyone Got Home Safe","默默確認大家有沒有平安到家的"],["Suspiciously Good At Spotting Danger Early","可疑地很會提早發現危險的"],["Never Relaxing Until Everyone's Accounted For","確認大家都到齊前絕不放鬆的"],["Suspiciously Strong Opinions About Safety","對安全問題意見異常多的"],["Standing Between You And Whatever's Coming","總是先擋在你和麻煩中間的"]],
+  counsel: [["Suspiciously Patient With A Long Game","可疑地很有耐心玩長期戰的"],["Never Showing Their Whole Hand","從不亮出所有底牌的"],["Suspiciously Good At Stalling For Time","可疑地很會拖延時間的"],["Quietly Outlasting Everyone Else's Plan","默默熬贏所有人的計畫的"],["Suspiciously Calm While Secretly Scheming","表面淡定其實在盤算的"],["Never Committing Until The Last Possible Moment","總是拖到最後一刻才決定的"],["Suspiciously Good At Undoing Things Quietly","可疑地很會悄悄拆掉東西的"],["Waiting Out The Storm With A Smile","笑著把風暴熬過去的"]],
+  spear: [["Suspiciously Direct About Everything","可疑地什麼都直來直往的"],["Never Sugarcoating It","從不拐彎抹角的"],["Suspiciously Good At Getting To The Point","可疑地很會講重點的"],["Quietly Sharpening Their Comeback","默默磨好反駁台詞的"],["Suspiciously Precise When Annoyed","被惹毛時異常精準的"],["Never Missing The Target","從不失手的"],["Suspiciously Good At One-Liners","可疑地很會講一句話讓人閉嘴的"],["Striking First, Explaining Later","先出手再解釋的"]],
+  command: [["Suspiciously Good At Delegating Everything","可疑地什麼都能分派出去的"],["Never Doubting Their Own Plan","從不懷疑自己計畫的"],["Suspiciously Organized Under Pressure","壓力下異常有條理的"],["Quietly Taking Charge Without Being Asked","沒人拜託就自動接管全場的"],["Suspiciously Good At Group Logistics","可疑地很會安排大家行程的"],["Never Losing Track Of Who's Doing What","從不搞混誰負責什麼的"],["Suspiciously Calm Giving Orders","下指令時異常冷靜的"],["Marching Everyone Forward, Whether Ready Or Not","不管準備好沒都要大家前進的"]],
+  sweetness: [["Suspiciously Sweet All The Time","可疑地隨時都很甜的"],["Never Running Out Of Kind Things To Say","好話從不缺的"],["Suspiciously Good At Making Things Feel Cozy","可疑地很會把場面弄溫馨的"],["Quietly Sneaking Snacks Into Every Situation","默默在任何場合都塞零食的"],["Suspiciously Good At Small, Thoughtful Gestures","可疑地很會做貼心小舉動的"],["Never Letting A Compliment Go Unnoticed","絕不放過任何一句稱讚的"],["Suspiciously Nurturing, Even To Strangers","對陌生人都異常照顧的"],["Leaving Everything A Little Sweeter Than They Found It","把經過的地方都變得更甜一點的"]],
+  abundance: [["Suspiciously Generous With Portions","可疑地給的份量總是很大方的"],["Never Showing Up Empty-Handed","從不空手赴約的"],["Suspiciously Good At Making Things Stretch Further","可疑地很會讓東西變得更多的"],["Quietly Doubling The Recipe Just In Case","默默把食譜份量加倍以防萬一的"],["Suspiciously Confident There's Always More","可疑地總相信還有更多的"],["Never Running Low On Anything","從不缺東西的"],["Suspiciously Good At Making Leftovers Disappear Happily","可疑地很會讓剩菜開心消失的"],["Sharing Before Being Asked To","不用開口就會分享的"]],
+  crown: [["Suspiciously Good At Accepting Praise Gracefully","可疑地很會優雅接受稱讚的"],["Never Turning Down A Toast","從不拒絕敬酒的"],["Suspiciously Good At Making Occasions Feel Special","可疑地很會把場合弄得很特別的"],["Quietly Expecting Applause","默默期待掌聲的"],["Suspiciously Photogenic At Celebrations","慶祝場合裡異常上相的"],["Never Missing A Chance To Be Honored","從不錯過被表揚機會的"],["Suspiciously Good At Giving Acceptance Speeches","可疑地很會講得獎感言的"],["Wearing Recognition Well","很懂得如何戴上榮耀的"]],
+  diligence: [["Suspiciously Early To Everything","可疑地什麼都提早到的"],["Never Turning In Anything Late","從不遲交任何東西的"],["Suspiciously Good At Overachieving Quietly","可疑地默默做超標的"],["Raising Their Hand Before The Question Ends","問題還沒問完就先舉手的"],["Suspiciously Competitive About Chores","連做家事都要比較的"],["Never Settling For Good Enough","從不接受「差不多就好」的"],["Suspiciously Good At Turning Hobbies Into Side Projects","可疑地把興趣都做成專案的"],["Color-Coding Their To-Do List","待辦清單還要分顏色的"]]
+};
+
+function seededShuffle(arr, seed){
+  const a = arr.slice();
+  let state = seed >>> 0;
+  function rand(){
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+    return state / 4294967296;
+  }
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(rand() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function getThemePool(ety){
+  const theme = ety.theme || godTheme[ety.godEn] || fallbackGodTheme[ety.godEn] || "__generic__";
+  return themedModifiers[theme] || playfulModifiers;
+}
+
+const themeToTrickster = {
+  precious:"Hermes", wisdom:"Prometheus", battle:"Eris", love:"Aphrodite", rule:"Momus",
+  sea:"Circe", light:"Momus", harvest:"Pan", hearth:"Comus", marriage:"Eris",
+  hunt:"Pan", victory:"Eris", justice:"Momus", trickster:"Hermes", night:"Dionysus",
+  luck:"Hermes", burden:"Prometheus", memory:"Circe", party:"Dionysus", message:"Momus",
+  peace:"Eris", grace:"Aphrodite", earth:"Pan", dawn:"Hermes", soul:"Aphrodite",
+  shadowmystery:"Circe", wakeworld:"Momus", magic:"Circe", reckoning:"Eris", tide:"Circe", windchill:"Pan",
+  south:"Pan", west:"Circe", nature:"Pan", fate:"Eris", foresight:"Prometheus", harmony:"Comus",
+  blessing:"Hermes", exaltation:"Momus", laurel:"Momus", sacred:"Circe", guardian:"Prometheus",
+  counsel:"Prometheus", spear:"Eris", command:"Eris", sweetness:"Comus", abundance:"Pan", crown:"Eris",
+  diligence:"Prometheus",
+  __generic__:"Hermes"
+};
+
+function getTrickster(ety){
+  const theme = ety.theme || godTheme[ety.godEn] || fallbackGodTheme[ety.godEn] || "__generic__";
+  const en = themeToTrickster[theme] || "Hermes";
+  return tricksterGods.find(g => g.en === en) || tricksterGods[0];
+}
+
+const exactEtymology = {
+  "gemma": {origin:"拉丁文 gemma", meaning:"寶石", godEn:"Hephaestus", godZh:"赫菲斯托斯", domainZh:"鍛造與珍寶的技藝", domainEn:"the forge and precious craft", coreZh:"寶石", coreEn:"gems"},
+  "sophia": {origin:"希臘文 sophia", meaning:"智慧", godEn:"Athena", godZh:"雅典娜", domainZh:"智慧與戰略", domainEn:"wisdom and strategy", coreZh:"智慧", coreEn:"wisdom"},
+  "sophie": {origin:"希臘文 sophia", meaning:"智慧", godEn:"Athena", godZh:"雅典娜", domainZh:"智慧與戰略", domainEn:"wisdom and strategy", coreZh:"智慧", coreEn:"wisdom"},
+  "sonia": {origin:"希臘文 sophia（經俄文/斯拉夫語轉譯）", meaning:"智慧", godEn:"Athena", godZh:"雅典娜", domainZh:"智慧與戰略", domainEn:"wisdom and strategy", coreZh:"智慧", coreEn:"wisdom"},
+  "sonya": {origin:"希臘文 sophia（經俄文/斯拉夫語轉譯）", meaning:"智慧", godEn:"Athena", godZh:"雅典娜", domainZh:"智慧與戰略", domainEn:"wisdom and strategy", coreZh:"智慧", coreEn:"wisdom"},
+  "sonja": {origin:"希臘文 sophia（經俄文/斯拉夫語轉譯）", meaning:"智慧", godEn:"Athena", godZh:"雅典娜", domainZh:"智慧與戰略", domainEn:"wisdom and strategy", coreZh:"智慧", coreEn:"wisdom"},
+  "helen": {origin:"希臘文 hēlē", meaning:"光／火炬", godEn:"Helios", godZh:"赫利歐斯", domainZh:"太陽與光輝", domainEn:"sunlight and radiance", coreZh:"光輝", coreEn:"radiance"},
+  "helena": {origin:"希臘文 hēlē", meaning:"光／火炬", godEn:"Helios", godZh:"赫利歐斯", domainZh:"太陽與光輝", domainEn:"sunlight and radiance", coreZh:"光輝", coreEn:"radiance"},
+  "irene": {origin:"希臘文 eirēnē", meaning:"和平", godEn:"Eirene", godZh:"厄瑞涅", domainZh:"和平與寧靜", domainEn:"peace and calm", coreZh:"寧靜", coreEn:"calm"},
+  "chloe": {origin:"希臘文 khloē", meaning:"新綠的嫩芽", godEn:"Demeter", godZh:"狄蜜特", domainZh:"豐收與新生的綠意", domainEn:"harvest and new growth", coreZh:"新綠", coreEn:"green shoots"},
+  "daphne": {origin:"希臘文 daphnē", meaning:"月桂樹", godEn:"Apollo", godZh:"阿波羅", domainZh:"桂冠與榮耀", domainEn:"laurels and glory", coreZh:"桂冠", coreEn:"laurels", theme:"laurel"},
+  "iris": {origin:"希臘文 iris", meaning:"彩虹", godEn:"Iris", godZh:"伊麗絲", domainZh:"彩虹與信使的疾行", domainEn:"the rainbow and swift messages", coreZh:"彩虹", coreEn:"rainbows"},
+  "phoebe": {origin:"希臘文 phoibos", meaning:"明亮、光輝", godEn:"Artemis", godZh:"阿蒂蜜絲", domainZh:"月光與狩獵", domainEn:"moonlight and the hunt", coreZh:"月光", coreEn:"moonlight"},
+  "cynthia": {origin:"希臘文（金索斯山別名）", meaning:"月之女神的別稱", godEn:"Artemis", godZh:"阿蒂蜜絲", domainZh:"月光與狩獵", domainEn:"moonlight and the hunt", coreZh:"月光", coreEn:"moonlight"},
+  "diana": {origin:"拉丁文，希臘阿蒂蜜絲的羅馬對應", meaning:"月與狩獵女神", godEn:"Artemis", godZh:"阿蒂蜜絲", domainZh:"月光與狩獵", domainEn:"moonlight and the hunt", coreZh:"月光", coreEn:"moonlight"},
+  "victoria": {origin:"拉丁文 victoria", meaning:"勝利", godEn:"Nike", godZh:"尼姬", domainZh:"勝利與桂冠", domainEn:"victory and laurels", coreZh:"勝利", coreEn:"victory"},
+  "nicole": {origin:"希臘文 nikē+laos", meaning:"人民的勝利", godEn:"Nike", godZh:"尼姬", domainZh:"勝利與桂冠", domainEn:"victory and laurels", coreZh:"勝利", coreEn:"victory"},
+  "nicholas": {origin:"希臘文 nikē+laos", meaning:"人民的勝利", godEn:"Nike", godZh:"尼姬", domainZh:"勝利與桂冠", domainEn:"victory and laurels", coreZh:"勝利", coreEn:"victory"},
+  "alexander": {origin:"希臘文 alexō+andros", meaning:"守護眾人者", godEn:"Athena", godZh:"雅典娜", domainZh:"防禦與戰略", domainEn:"defense and strategy", coreZh:"守護", coreEn:"protection", theme:"guardian"},
+  "alexandra": {origin:"希臘文 alexō+andros", meaning:"守護眾人者", godEn:"Athena", godZh:"雅典娜", domainZh:"防禦與戰略", domainEn:"defense and strategy", coreZh:"守護", coreEn:"protection", theme:"guardian"},
+  "alex": {origin:"希臘文 alexō+andros", meaning:"守護者", godEn:"Athena", godZh:"雅典娜", domainZh:"防禦與戰略", domainEn:"defense and strategy", coreZh:"守護", coreEn:"protection", theme:"guardian"},
+  "sandra": {origin:"希臘文 alexō+andros（Alexandra 縮寫）", meaning:"守護眾人者", godEn:"Athena", godZh:"雅典娜", domainZh:"防禦與戰略", domainEn:"defense and strategy", coreZh:"守護", coreEn:"protection", theme:"guardian"},
+  "andrew": {origin:"希臘文 andreios", meaning:"勇敢、男子氣概", godEn:"Ares", godZh:"阿瑞斯", domainZh:"勇氣與戰鬥", domainEn:"courage and battle", coreZh:"勇氣", coreEn:"courage"},
+  "andrea": {origin:"希臘文 andreios（陰性形）", meaning:"勇敢、剛毅", godEn:"Ares", godZh:"阿瑞斯", domainZh:"勇氣與戰鬥", domainEn:"courage and battle", coreZh:"勇氣", coreEn:"courage"},
+  "philip": {origin:"希臘文 philos+hippos", meaning:"愛馬之人", godEn:"Poseidon", godZh:"波賽頓", domainZh:"馬匹與海洋", domainEn:"horses and the sea", coreZh:"駿馬", coreEn:"horses"},
+  "theodore": {origin:"希臘文 theos+dōron", meaning:"神的禮物", godEn:"Zeus", godZh:"宙斯", domainZh:"神聖的贈禮", domainEn:"divine blessing", coreZh:"神賜", coreEn:"divine gifts", theme:"blessing"},
+  "theo": {origin:"希臘文 theos+dōron", meaning:"神的禮物", godEn:"Zeus", godZh:"宙斯", domainZh:"神聖的贈禮", domainEn:"divine blessing", coreZh:"神賜", coreEn:"divine gifts", theme:"blessing"},
+  "dorothy": {origin:"希臘文 dōron+theos", meaning:"神的禮物", godEn:"Zeus", godZh:"宙斯", domainZh:"神聖的贈禮", domainEn:"divine blessing", coreZh:"神賜", coreEn:"divine gifts", theme:"blessing"},
+  "dora": {origin:"希臘文 dōron", meaning:"禮物", godEn:"Zeus", godZh:"宙斯", domainZh:"神聖的贈禮", domainEn:"divine blessing", coreZh:"神賜", coreEn:"divine gifts", theme:"blessing"},
+  "peter": {origin:"希臘文 petros", meaning:"岩石", godEn:"Gaia", godZh:"蓋亞", domainZh:"磐石與大地", domainEn:"bedrock and the earth", coreZh:"磐石", coreEn:"bedrock"},
+  "george": {origin:"希臘文 geōrgos", meaning:"耕作大地之人", godEn:"Demeter", godZh:"狄蜜特", domainZh:"豐收與大地", domainEn:"harvest and earth", coreZh:"豐收", coreEn:"harvest"},
+  "margaret": {origin:"希臘文 margaritēs", meaning:"珍珠", godEn:"Aphrodite", godZh:"阿芙蘿黛蒂", domainZh:"海洋孕育的珍珠與美", domainEn:"pearls born of the sea", coreZh:"珍珠", coreEn:"pearls"},
+  "megan": {origin:"希臘文 margaritēs（Margaret 威爾斯變體）", meaning:"珍珠", godEn:"Aphrodite", godZh:"阿芙蘿黛蒂", domainZh:"海洋孕育的珍珠與美", domainEn:"pearls born of the sea", coreZh:"珍珠", coreEn:"pearls"},
+  "christopher": {origin:"希臘文 christos+pherō", meaning:"背負者", godEn:"Atlas", godZh:"阿特拉斯", domainZh:"承載天穹的重量", domainEn:"bearing the weight of the sky", coreZh:"承載", coreEn:"bearing weight"},
+  "christian": {origin:"希臘文 christos", meaning:"受膏者、神聖的", godEn:"Apollo", godZh:"阿波羅", domainZh:"受膏的神聖光輝", domainEn:"the anointed and sacred light", coreZh:"神聖", coreEn:"the sacred", theme:"sacred"},
+  "christine": {origin:"希臘文 christos", meaning:"受膏者、神聖的", godEn:"Apollo", godZh:"阿波羅", domainZh:"受膏的神聖光輝", domainEn:"the anointed and sacred light", coreZh:"神聖", coreEn:"the sacred", theme:"sacred"},
+  "christina": {origin:"希臘文 christos", meaning:"受膏者、神聖的", godEn:"Apollo", godZh:"阿波羅", domainZh:"受膏的神聖光輝", domainEn:"the anointed and sacred light", coreZh:"神聖", coreEn:"the sacred", theme:"sacred"},
+  "stephen": {origin:"希臘文 stephanos", meaning:"花冠、桂冠", godEn:"Nike", godZh:"尼姬", domainZh:"勝利的花冠", domainEn:"the victor's crown", coreZh:"花冠", coreEn:"crowns", theme:"crown"},
+  "steven": {origin:"希臘文 stephanos", meaning:"花冠、桂冠", godEn:"Nike", godZh:"尼姬", domainZh:"勝利的花冠", domainEn:"the victor's crown", coreZh:"花冠", coreEn:"crowns", theme:"crown"},
+  "stephanie": {origin:"希臘文 stephanos", meaning:"花冠、桂冠", godEn:"Nike", godZh:"尼姬", domainZh:"勝利的花冠", domainEn:"the victor's crown", coreZh:"花冠", coreEn:"crowns", theme:"crown"},
+  "eugene": {origin:"希臘文 eu+genos", meaning:"出身高貴", godEn:"Hera", godZh:"赫拉", domainZh:"高貴的血統", domainEn:"noble lineage", coreZh:"高貴", coreEn:"nobility"},
+  "eugenia": {origin:"希臘文 eu+genos", meaning:"出身高貴", godEn:"Hera", godZh:"赫拉", domainZh:"高貴的血統", domainEn:"noble lineage", coreZh:"高貴", coreEn:"nobility"},
+  "cassandra": {origin:"希臘文", meaning:"令人心動之人／被詛咒的預言者", godEn:"Apollo", godZh:"阿波羅", domainZh:"預言的天賦與詛咒", domainEn:"the gift and curse of prophecy", coreZh:"預言", coreEn:"prophecy", theme:"sacred"},
+  "penelope": {origin:"希臘文，奧德賽王后之名", meaning:"忠貞的織布者", godEn:"Athena", godZh:"雅典娜", domainZh:"織布與靜默的智謀", domainEn:"weaving and quiet cunning", coreZh:"織布", coreEn:"weaving", theme:"counsel"},
+  "hector": {origin:"希臘文 ekhein", meaning:"堅守、持有", godEn:"Ares", godZh:"阿瑞斯", domainZh:"堅守與防禦", domainEn:"steadfast defense", coreZh:"堅守", coreEn:"steadfastness"},
+  "achilles": {origin:"希臘文，荷馬史詩英雄之名", meaning:"疾足的戰士", godEn:"Ares", godZh:"阿瑞斯", domainZh:"疾速的戰鬥", domainEn:"swiftness in battle", coreZh:"疾速", coreEn:"swiftness"},
+  "lucas": {origin:"拉丁文 lux", meaning:"光", godEn:"Apollo", godZh:"阿波羅", domainZh:"光明與音樂", domainEn:"light and music", coreZh:"光明", coreEn:"light"},
+  "luke": {origin:"拉丁文 lux", meaning:"光", godEn:"Apollo", godZh:"阿波羅", domainZh:"光明與音樂", domainEn:"light and music", coreZh:"光明", coreEn:"light"},
+  "clara": {origin:"拉丁文 clarus", meaning:"清晰、明亮", godEn:"Apollo", godZh:"阿波羅", domainZh:"清晰的光亮", domainEn:"clarity and brightness", coreZh:"清亮", coreEn:"clarity"},
+  "claire": {origin:"拉丁文 clarus", meaning:"清晰、明亮", godEn:"Apollo", godZh:"阿波羅", domainZh:"清晰的光亮", domainEn:"clarity and brightness", coreZh:"清亮", coreEn:"clarity"},
+  "sylvia": {origin:"拉丁文 silva", meaning:"森林", godEn:"Pan", godZh:"潘", domainZh:"荒野與森林", domainEn:"the wild woodland", coreZh:"森林", coreEn:"the woodland"},
+  "victor": {origin:"拉丁文 victor", meaning:"勝利者", godEn:"Nike", godZh:"尼姬", domainZh:"勝利與桂冠", domainEn:"victory and laurels", coreZh:"勝利", coreEn:"victory"},
+  "felix": {origin:"拉丁文 felix", meaning:"幸運、幸福", godEn:"Tyche", godZh:"堤喀", domainZh:"幸運與機緣", domainEn:"fortune and chance", coreZh:"幸運", coreEn:"fortune"},
+  "gloria": {origin:"拉丁文 gloria", meaning:"榮耀", godEn:"Nike", godZh:"尼姬", domainZh:"榮耀與勝利", domainEn:"glory and victory", coreZh:"榮耀", coreEn:"glory", theme:"crown"},
+  "amanda": {origin:"拉丁文 amanda", meaning:"值得被愛之人", godEn:"Aphrodite", godZh:"阿芙蘿黛蒂", domainZh:"愛與美", domainEn:"love and beauty", coreZh:"愛", coreEn:"love"},
+  "amy": {origin:"古法文 amee", meaning:"摯愛之人", godEn:"Aphrodite", godZh:"阿芙蘿黛蒂", domainZh:"愛與美", domainEn:"love and beauty", coreZh:"愛", coreEn:"love"},
+  "natalie": {origin:"拉丁文 natalis", meaning:"誕生之日", godEn:"Eos", godZh:"厄俄斯", domainZh:"新生的黎明", domainEn:"the dawn of new beginnings", coreZh:"黎明", coreEn:"dawn"},
+  "grace": {origin:"拉丁文 gratia", meaning:"恩典、優雅", godEn:"Charites", godZh:"卡里忒斯", domainZh:"優雅與魅力", domainEn:"grace and charm", coreZh:"優雅", coreEn:"grace"},
+  "olivia": {origin:"拉丁文 oliva", meaning:"橄欖樹", godEn:"Athena", godZh:"雅典娜", domainZh:"雅典的聖樹：橄欖", domainEn:"the sacred olive of Athens", coreZh:"橄欖枝", coreEn:"the olive branch", theme:"nature"},
+  "julia": {origin:"拉丁文 iuvenis", meaning:"青春、朝氣", godEn:"Hebe", godZh:"赫柏", domainZh:"永恆的青春", domainEn:"eternal youth", coreZh:"青春", coreEn:"youth"},
+  "julie": {origin:"拉丁文 iuvenis", meaning:"青春、朝氣", godEn:"Hebe", godZh:"赫柏", domainZh:"永恆的青春", domainEn:"eternal youth", coreZh:"青春", coreEn:"youth"},
+  "virginia": {origin:"拉丁文 virgo", meaning:"少女、純潔", godEn:"Artemis", godZh:"阿蒂蜜絲", domainZh:"純潔的少女與狩獵", domainEn:"maidenhood and the hunt", coreZh:"純潔", coreEn:"purity"},
+  "laura": {origin:"拉丁文 laurus", meaning:"月桂樹", godEn:"Apollo", godZh:"阿波羅", domainZh:"桂冠與榮耀", domainEn:"laurels and glory", coreZh:"桂冠", coreEn:"laurels", theme:"laurel"},
+  "lauren": {origin:"拉丁文 laurus", meaning:"月桂樹", godEn:"Apollo", godZh:"阿波羅", domainZh:"桂冠與榮耀", domainEn:"laurels and glory", coreZh:"桂冠", coreEn:"laurels", theme:"laurel"},
+  "larry": {origin:"拉丁文 Laurentum（月桂之城）", meaning:"來自月桂之城", godEn:"Apollo", godZh:"阿波羅", domainZh:"桂冠與榮耀", domainEn:"laurels and glory", coreZh:"桂冠", coreEn:"laurels", theme:"laurel"},
+  "lawrence": {origin:"拉丁文 Laurentum（月桂之城）", meaning:"來自月桂之城", godEn:"Apollo", godZh:"阿波羅", domainZh:"桂冠與榮耀", domainEn:"laurels and glory", coreZh:"桂冠", coreEn:"laurels", theme:"laurel"},
+  "justin": {origin:"拉丁文 iustus", meaning:"公正、正義", godEn:"Themis", godZh:"忒彌斯", domainZh:"律法與正義", domainEn:"law and justice", coreZh:"正義", coreEn:"justice"},
+  "danielle": {origin:"希伯來文 dan+el", meaning:"神是我的審判者", godEn:"Themis", godZh:"忒彌斯", domainZh:"律法與正義", domainEn:"law and justice", coreZh:"正義", coreEn:"justice"},
+  "daniel": {origin:"希伯來文 dan+el", meaning:"神是我的審判者", godEn:"Themis", godZh:"忒彌斯", domainZh:"律法與正義", domainEn:"law and justice", coreZh:"正義", coreEn:"justice"},
+  "isabella": {origin:"希伯來文（經西班牙文轉譯自 Elizabeth）", meaning:"神的誓言", godEn:"Themis", godZh:"忒彌斯", domainZh:"神聖的誓約", domainEn:"a sacred oath", coreZh:"誓約", coreEn:"oaths"},
+  "elizabeth": {origin:"希伯來文 elisheva", meaning:"神的誓言", godEn:"Themis", godZh:"忒彌斯", domainZh:"神聖的誓約", domainEn:"a sacred oath", coreZh:"誓約", coreEn:"oaths"},
+  "james": {origin:"希伯來文 ya'akov", meaning:"抓住腳跟者、取代者", godEn:"Hermes", godZh:"赫米斯", domainZh:"詭計與競逐", domainEn:"cunning and rivalry", coreZh:"詭計", coreEn:"cunning"},
+  "jacob": {origin:"希伯來文 ya'akov", meaning:"抓住腳跟者、取代者", godEn:"Hermes", godZh:"赫米斯", domainZh:"詭計與競逐", domainEn:"cunning and rivalry", coreZh:"詭計", coreEn:"cunning"},
+  "jacqueline": {origin:"希伯來文 ya'akov（法文陰性形）", meaning:"抓住腳跟者", godEn:"Hermes", godZh:"赫米斯", domainZh:"詭計與競逐", domainEn:"cunning and rivalry", coreZh:"詭計", coreEn:"cunning"},
+  "john": {origin:"希伯來文 yochanan", meaning:"神的恩惠", godEn:"Zeus", godZh:"宙斯", domainZh:"神聖的恩寵", domainEn:"divine favor", coreZh:"恩寵", coreEn:"favor", theme:"blessing"},
+  "jack": {origin:"希伯來文 yochanan（John 暱稱）", meaning:"神的恩惠", godEn:"Zeus", godZh:"宙斯", domainZh:"神聖的恩寵", domainEn:"divine favor", coreZh:"恩寵", coreEn:"favor", theme:"blessing"},
+  "jonathan": {origin:"希伯來文 yehonatan", meaning:"神所賜予", godEn:"Zeus", godZh:"宙斯", domainZh:"神聖的贈禮", domainEn:"divine blessing", coreZh:"神賜", coreEn:"divine gifts", theme:"blessing"},
+  "matthew": {origin:"希伯來文 mattithyahu", meaning:"神的禮物", godEn:"Zeus", godZh:"宙斯", domainZh:"神聖的贈禮", domainEn:"divine blessing", coreZh:"神賜", coreEn:"divine gifts", theme:"blessing"},
+  "nathan": {origin:"希伯來文 natan", meaning:"祂已賜下", godEn:"Zeus", godZh:"宙斯", domainZh:"神聖的贈禮", domainEn:"divine blessing", coreZh:"神賜", coreEn:"divine gifts", theme:"blessing"},
+  "michael": {origin:"希伯來文 mikha'el", meaning:"誰能像神一樣", godEn:"Zeus", godZh:"宙斯", domainZh:"無可比擬的地位", domainEn:"an unmatched stature", coreZh:"至高", coreEn:"the supreme", theme:"exaltation"},
+  "michelle": {origin:"希伯來文 mikha'el（法文陰性形）", meaning:"誰能像神一樣", godEn:"Zeus", godZh:"宙斯", domainZh:"無可比擬的地位", domainEn:"an unmatched stature", coreZh:"至高", coreEn:"the supreme", theme:"exaltation"},
+  "william": {origin:"日耳曼文 wil+helm", meaning:"堅毅的守護者", godEn:"Athena", godZh:"雅典娜", domainZh:"堅定的守護", domainEn:"steadfast protection", coreZh:"守護", coreEn:"protection", theme:"guardian"},
+  "willie": {origin:"日耳曼文 wil+helm（William 暱稱）", meaning:"堅毅的守護者", godEn:"Athena", godZh:"雅典娜", domainZh:"堅定的守護", domainEn:"steadfast protection", coreZh:"守護", coreEn:"protection", theme:"guardian"},
+  "billy": {origin:"日耳曼文 wil+helm（William 暱稱）", meaning:"堅毅的守護者", godEn:"Athena", godZh:"雅典娜", domainZh:"堅定的守護", domainEn:"steadfast protection", coreZh:"守護", coreEn:"protection", theme:"guardian"},
+  "bobby": {origin:"日耳曼文 berht+hraban（Robert 暱稱）", meaning:"光耀的聲名", godEn:"Apollo", godZh:"阿波羅", domainZh:"光輝與聲名", domainEn:"radiance and renown", coreZh:"聲名", coreEn:"renown"},
+  "robert": {origin:"日耳曼文 hrod+berht", meaning:"光耀的聲名", godEn:"Apollo", godZh:"阿波羅", domainZh:"光輝與聲名", domainEn:"radiance and renown", coreZh:"聲名", coreEn:"renown"},
+  "albert": {origin:"日耳曼文 adal+berht", meaning:"高貴的光輝", godEn:"Apollo", godZh:"阿波羅", domainZh:"光輝與聲名", domainEn:"radiance and renown", coreZh:"光輝", coreEn:"radiance"},
+  "david": {origin:"希伯來文 david", meaning:"摯愛", godEn:"Aphrodite", godZh:"阿芙蘿黛蒂", domainZh:"被珍愛之人", domainEn:"the beloved and cherished", coreZh:"摯愛", coreEn:"the beloved"},
+  "richard": {origin:"日耳曼文 ric+hard", meaning:"堅毅的統治者", godEn:"Zeus", godZh:"宙斯", domainZh:"至高的統治意志", domainEn:"the supreme will to rule", coreZh:"統治", coreEn:"rule"},
+  "joseph": {origin:"希伯來文 yosef", meaning:"祂必增添", godEn:"Demeter", godZh:"狄蜜特", domainZh:"增益與豐盛", domainEn:"abundance and increase", coreZh:"豐盛", coreEn:"abundance", theme:"abundance"},
+  "jose": {origin:"希伯來文 yosef（西班牙文形式）", meaning:"祂必增添", godEn:"Demeter", godZh:"狄蜜特", domainZh:"增益與豐盛", domainEn:"abundance and increase", coreZh:"豐盛", coreEn:"abundance", theme:"abundance"},
+  "thomas": {origin:"亞蘭文 te'oma", meaning:"雙生子", godEn:"Apollo", godZh:"阿波羅", domainZh:"孿生神祇的羈絆", domainEn:"the bond of divine twins", coreZh:"孿生", coreEn:"twinhood", theme:"sacred"},
+  "charles": {origin:"日耳曼文 karl", meaning:"自由之人", godEn:"Zeus", godZh:"宙斯", domainZh:"自由與統帥", domainEn:"freedom and command", coreZh:"自由", coreEn:"freedom"},
+  "carl": {origin:"日耳曼文 karl", meaning:"自由之人", godEn:"Zeus", godZh:"宙斯", domainZh:"自由與統帥", domainEn:"freedom and command", coreZh:"自由", coreEn:"freedom"},
+  "carol": {origin:"日耳曼文 karl（陰性形）", meaning:"自由之人", godEn:"Zeus", godZh:"宙斯", domainZh:"自由與統帥", domainEn:"freedom and command", coreZh:"自由", coreEn:"freedom"},
+  "carolyn": {origin:"日耳曼文 karl（陰性形）", meaning:"自由之人", godEn:"Zeus", godZh:"宙斯", domainZh:"自由與統帥", domainEn:"freedom and command", coreZh:"自由", coreEn:"freedom"},
+  "charlotte": {origin:"日耳曼文 karl（法文陰性形）", meaning:"自由之人", godEn:"Zeus", godZh:"宙斯", domainZh:"自由與統帥", domainEn:"freedom and command", coreZh:"自由", coreEn:"freedom"},
+  "frances": {origin:"日耳曼文/拉丁文 francus", meaning:"自由之人", godEn:"Zeus", godZh:"宙斯", domainZh:"自由與統帥", domainEn:"freedom and command", coreZh:"自由", coreEn:"freedom"},
+  "frank": {origin:"日耳曼文/拉丁文 francus", meaning:"自由之人", godEn:"Zeus", godZh:"宙斯", domainZh:"自由與統帥", domainEn:"freedom and command", coreZh:"自由", coreEn:"freedom"},
+  "mark": {origin:"拉丁文 Mars", meaning:"獻給戰神馬爾斯", godEn:"Ares", godZh:"阿瑞斯", domainZh:"戰爭與英勇", domainEn:"war and valor", coreZh:"英勇", coreEn:"valor"},
+  "donald": {origin:"蓋爾文 dumhno+val", meaning:"世界的統治者", godEn:"Zeus", godZh:"宙斯", domainZh:"至高的統治意志", domainEn:"the supreme will to rule", coreZh:"統治", coreEn:"rule"},
+  "paul": {origin:"拉丁文 paulus", meaning:"渺小、謙遜", godEn:"Hestia", godZh:"赫斯提亞", domainZh:"謙遜與爐火", domainEn:"humility and the hearth", coreZh:"謙遜", coreEn:"humility"},
+  "joshua": {origin:"希伯來文 yehoshua", meaning:"神是拯救", godEn:"Apollo", godZh:"阿波羅", domainZh:"救贖與療癒", domainEn:"deliverance and healing", coreZh:"救贖", coreEn:"deliverance", theme:"sacred"},
+  "kenneth": {origin:"蓋爾文 cináed", meaning:"生於火焰、俊美", godEn:"Hephaestus", godZh:"赫菲斯托斯", domainZh:"爐火與鍛造", domainEn:"fire and the forge", coreZh:"爐火", coreEn:"fire"},
+  "kevin": {origin:"蓋爾文 caoimhín", meaning:"俊美、摯愛", godEn:"Aphrodite", godZh:"阿芙蘿黛蒂", domainZh:"愛與美", domainEn:"love and beauty", coreZh:"美", coreEn:"beauty"},
+  "brian": {origin:"凱爾特文", meaning:"高貴、強壯", godEn:"Ares", godZh:"阿瑞斯", domainZh:"勇氣與戰鬥", domainEn:"courage and battle", coreZh:"勇氣", coreEn:"courage"},
+  "bryan": {origin:"凱爾特文", meaning:"高貴、強壯", godEn:"Ares", godZh:"阿瑞斯", domainZh:"勇氣與戰鬥", domainEn:"courage and battle", coreZh:"勇氣", coreEn:"courage"},
+  "edward": {origin:"古英文 ead+weard", meaning:"富足的守護者", godEn:"Plutus", godZh:"普路托斯", domainZh:"黃金與寶藏", domainEn:"gold and hidden wealth", coreZh:"黃金", coreEn:"gold"},
+  "jesse": {origin:"希伯來文 yishai", meaning:"禮物、富有", godEn:"Plutus", godZh:"普路托斯", domainZh:"黃金與寶藏", domainEn:"gold and hidden wealth", coreZh:"黃金", coreEn:"gold"},
+  "amber": {origin:"英文，源自阿拉伯文 anbar", meaning:"琥珀", godEn:"Plutus", godZh:"普路托斯", domainZh:"琥珀與古老的樹脂", domainEn:"amber and ancient resin", coreZh:"琥珀", coreEn:"amber"},
+  "ronald": {origin:"古諾斯文 ragin+valdr", meaning:"睿智的統治者", godEn:"Athena", godZh:"雅典娜", domainZh:"睿智的謀略", domainEn:"wise counsel", coreZh:"謀略", coreEn:"counsel", theme:"guardian"},
+  "raymond": {origin:"日耳曼文 ragin+mund", meaning:"睿智的守護者", godEn:"Athena", godZh:"雅典娜", domainZh:"睿智的謀略", domainEn:"wise counsel", coreZh:"謀略", coreEn:"counsel", theme:"guardian"},
+  "timothy": {origin:"希臘文 timaō+theos", meaning:"敬奉神明", godEn:"Zeus", godZh:"宙斯", domainZh:"敬奉神明的榮耀", domainEn:"honoring the divine", coreZh:"敬奉", coreEn:"reverence", theme:"exaltation"},
+  "jason": {origin:"希臘文 iasthai", meaning:"療癒者", godEn:"Apollo", godZh:"阿波羅", domainZh:"救贖與療癒", domainEn:"deliverance and healing", coreZh:"療癒", coreEn:"healing", theme:"sacred"},
+  "jeffrey": {origin:"日耳曼文 gawia+frid", meaning:"和平的誓約", godEn:"Eirene", godZh:"厄瑞涅", domainZh:"和平與寧靜", domainEn:"peace and calm", coreZh:"寧靜", coreEn:"calm"},
+  "ryan": {origin:"蓋爾文 rian", meaning:"小國王", godEn:"Zeus", godZh:"宙斯", domainZh:"至高的統治意志", domainEn:"the supreme will to rule", coreZh:"統治", coreEn:"rule"},
+  "roy": {origin:"法文 roi／蓋爾文「紅」", meaning:"國王", godEn:"Zeus", godZh:"宙斯", domainZh:"至高的統治意志", domainEn:"the supreme will to rule", coreZh:"統治", coreEn:"rule"},
+  "gary": {origin:"日耳曼文 gar", meaning:"矛", godEn:"Ares", godZh:"阿瑞斯", domainZh:"長矛與戰鬥", domainEn:"the spear and battle", coreZh:"長矛", coreEn:"the spear", theme:"spear"},
+  "gerald": {origin:"日耳曼文 ger+wald", meaning:"執矛的統治者", godEn:"Ares", godZh:"阿瑞斯", domainZh:"長矛與戰鬥", domainEn:"the spear and battle", coreZh:"長矛", coreEn:"the spear", theme:"spear"},
+  "jerry": {origin:"日耳曼文 ger+wald（Gerald 暱稱）", meaning:"執矛的統治者", godEn:"Ares", godZh:"阿瑞斯", domainZh:"長矛與戰鬥", domainEn:"the spear and battle", coreZh:"長矛", coreEn:"the spear", theme:"spear"},
+  "roger": {origin:"日耳曼文 hrod+ger", meaning:"聲名遠播的長矛", godEn:"Ares", godZh:"阿瑞斯", domainZh:"長矛與戰鬥", domainEn:"the spear and battle", coreZh:"長矛", coreEn:"the spear", theme:"spear"},
+  "walter": {origin:"日耳曼文 wald+heri", meaning:"統軍的將領", godEn:"Ares", godZh:"阿瑞斯", domainZh:"軍旅的統帥", domainEn:"command of the army", coreZh:"統帥", coreEn:"command", theme:"command"},
+  "harold": {origin:"日耳曼文 here+wald", meaning:"軍隊的統治者", godEn:"Ares", godZh:"阿瑞斯", domainZh:"軍旅的統帥", domainEn:"command of the army", coreZh:"統帥", coreEn:"command", theme:"command"},
+  "louis": {origin:"日耳曼文 hlud+wig", meaning:"著名的戰士", godEn:"Ares", godZh:"阿瑞斯", domainZh:"勇氣與戰鬥", domainEn:"courage and battle", coreZh:"勇氣", coreEn:"courage", theme:"command"},
+  "madison": {origin:"古英文 mihtig（Maud 之子）", meaning:"戰鬥中強大的", godEn:"Ares", godZh:"阿瑞斯", domainZh:"勇氣與戰鬥", domainEn:"courage and battle", coreZh:"勇氣", coreEn:"courage", theme:"command"},
+  "kelly": {origin:"蓋爾文 ceallach", meaning:"戰士", godEn:"Ares", godZh:"阿瑞斯", domainZh:"勇氣與戰鬥", domainEn:"courage and battle", coreZh:"勇氣", coreEn:"courage", theme:"command"},
+  "arthur": {origin:"凱爾特文（字源有爭議）", meaning:"熊、石頭", godEn:"Artemis", godZh:"阿蒂蜜絲", domainZh:"熊與荒野", domainEn:"the bear and the wild", coreZh:"荒野", coreEn:"the wild"},
+  "ralph": {origin:"古諾斯文 rad+wulf", meaning:"狼的謀略", godEn:"Artemis", godZh:"阿蒂蜜絲", domainZh:"狼群與荒野的謀略", domainEn:"wolves and wild counsel", coreZh:"狼群", coreEn:"wolves"},
+  "rachel": {origin:"希伯來文 rachel", meaning:"母羊", godEn:"Artemis", godZh:"阿蒂蜜絲", domainZh:"溫馴的羊群與荒野", domainEn:"the gentle flock and the wild", coreZh:"羊群", coreEn:"the flock"},
+  "keith": {origin:"蘇格蘭蓋爾文", meaning:"森林", godEn:"Pan", godZh:"潘", domainZh:"荒野與森林", domainEn:"the wild woodland", coreZh:"森林", coreEn:"the woodland"},
+  "bruce": {origin:"古法文（地名，灌木林）", meaning:"灌木林地", godEn:"Pan", godZh:"潘", domainZh:"荒野與森林", domainEn:"the wild woodland", coreZh:"森林", coreEn:"the woodland"},
+  "heather": {origin:"中古英文 heather", meaning:"石楠花", godEn:"Pan", godZh:"潘", domainZh:"石楠荒原", domainEn:"the heather moor", coreZh:"荒原", coreEn:"the moor"},
+  "ashley": {origin:"古英文 æsc+lēah", meaning:"梣木草原", godEn:"Artemis", godZh:"阿蒂蜜絲", domainZh:"梣木林地與狩獵", domainEn:"the ash grove and the hunt", coreZh:"林地", coreEn:"the grove"},
+  "jeremy": {origin:"希伯來文 yirmeyahu", meaning:"神必興起", godEn:"Zeus", godZh:"宙斯", domainZh:"至高的興起", domainEn:"divine exaltation", coreZh:"興起", coreEn:"exaltation", theme:"exaltation"},
+  "aaron": {origin:"希伯來文 aharon", meaning:"崇高的山", godEn:"Zeus", godZh:"宙斯", domainZh:"巍峨的高處", domainEn:"the exalted heights", coreZh:"巍峨", coreEn:"the heights", theme:"exaltation"},
+  "austin": {origin:"拉丁文 augustus", meaning:"威嚴、崇高", godEn:"Zeus", godZh:"宙斯", domainZh:"巍峨的高處", domainEn:"the exalted heights", coreZh:"威嚴", coreEn:"majesty", theme:"exaltation"},
+  "henry": {origin:"日耳曼文 heim+ric", meaning:"家的統治者", godEn:"Hestia", godZh:"赫斯提亞", domainZh:"家與爐火的統御", domainEn:"the rule of hearth and home", coreZh:"爐火", coreEn:"the hearth"},
+  "adam": {origin:"希伯來文 adamah", meaning:"紅土、大地", godEn:"Gaia", godZh:"蓋亞", domainZh:"大地與人類的起源", domainEn:"the earth and the origin of mankind", coreZh:"大地", coreEn:"the earth"},
+  "douglas": {origin:"蓋爾文 dubh+glais", meaning:"幽暗的河流", godEn:"Poseidon", godZh:"波賽頓", domainZh:"江河與海洋", domainEn:"rivers and the sea", coreZh:"河流", coreEn:"rivers"},
+  "beverly": {origin:"古英文 beofor+lēah", meaning:"河狸的溪流", godEn:"Poseidon", godZh:"波賽頓", domainZh:"江河與海洋", domainEn:"rivers and the sea", coreZh:"溪流", coreEn:"streams"},
+  "kyle": {origin:"蓋爾文 caol", meaning:"海峽、狹道", godEn:"Poseidon", godZh:"波賽頓", domainZh:"海峽與潮汐", domainEn:"straits and tides", coreZh:"潮汐", coreEn:"tides"},
+  "maria": {origin:"希伯來文（字源有爭議）", meaning:"苦／海之星／摯愛", godEn:"Poseidon", godZh:"波賽頓", domainZh:"江河與海洋", domainEn:"rivers and the sea", coreZh:"海洋", coreEn:"the sea"},
+  "mary": {origin:"希伯來文（字源有爭議）", meaning:"苦／海之星／摯愛", godEn:"Poseidon", godZh:"波賽頓", domainZh:"江河與海洋", domainEn:"rivers and the sea", coreZh:"海洋", coreEn:"the sea"},
+  "marilyn": {origin:"希伯來文（Mary+Lyn 混成）", meaning:"海之星", godEn:"Poseidon", godZh:"波賽頓", domainZh:"江河與海洋", domainEn:"rivers and the sea", coreZh:"海洋", coreEn:"the sea"},
+  "doris": {origin:"希臘文，海洋寧芙與地區之名", meaning:"海洋的贈禮", godEn:"Poseidon", godZh:"波賽頓", domainZh:"海洋寧芙的優雅", domainEn:"the grace of a sea nymph", coreZh:"海之寧芙", coreEn:"the sea nymph"},
+  "jennifer": {origin:"威爾斯文 gwen+hwyfar", meaning:"潔白的浪花", godEn:"Poseidon", godZh:"波賽頓", domainZh:"浪花與潔白之美", domainEn:"white waves and pale beauty", coreZh:"浪花", coreEn:"waves"},
+  "zachary": {origin:"希伯來文 zekharyah", meaning:"神記念了", godEn:"Mnemosyne", godZh:"謨涅摩緒涅", domainZh:"神所記得之人", domainEn:"one whom the gods remember", coreZh:"記念", coreEn:"remembrance"},
+  "denise": {origin:"希臘文 Dionysios（陰性形）", meaning:"屬於戴歐尼修斯", godEn:"Dionysus", godZh:"戴歐尼修斯", domainZh:"酒與狂歡", domainEn:"wine and revelry", coreZh:"狂歡", coreEn:"revelry"},
+  "dennis": {origin:"希臘文 Dionysios", meaning:"屬於戴歐尼修斯", godEn:"Dionysus", godZh:"戴歐尼修斯", domainZh:"酒與狂歡", domainEn:"wine and revelry", coreZh:"狂歡", coreEn:"revelry"},
+  "joyce": {origin:"拉丁文 iocus", meaning:"歡愉、玩笑", godEn:"Dionysus", godZh:"戴歐尼修斯", domainZh:"酒與狂歡", domainEn:"wine and revelry", coreZh:"歡愉", coreEn:"revelry"},
+  "abigail": {origin:"希伯來文 avigayil", meaning:"父親的喜悅", godEn:"Dionysus", godZh:"戴歐尼修斯", domainZh:"純粹的喜悅", domainEn:"pure joy", coreZh:"喜悅", coreEn:"joy"},
+  "tyler": {origin:"古英文 tigele", meaning:"製磚瓦的工匠", godEn:"Hephaestus", godZh:"赫菲斯托斯", domainZh:"爐火與鍛造", domainEn:"fire and the forge", coreZh:"工藝", coreEn:"craft"},
+  "mason": {origin:"古法文 masson", meaning:"石匠", godEn:"Hephaestus", godZh:"赫菲斯托斯", domainZh:"鍛造與珍寶的技藝", domainEn:"the forge and precious craft", coreZh:"工藝", coreEn:"craft"},
+  "wayne": {origin:"古英文 wægn", meaning:"造車匠", godEn:"Hephaestus", godZh:"赫菲斯托斯", domainZh:"鍛造與珍寶的技藝", domainEn:"the forge and precious craft", coreZh:"工藝", coreEn:"craft"},
+  "eric": {origin:"古諾斯文 ei+ríkr", meaning:"永恆的統治者", godEn:"Zeus", godZh:"宙斯", domainZh:"至高的統治意志", domainEn:"the supreme will to rule", coreZh:"統治", coreEn:"rule"},
+  "gregory": {origin:"希臘文 gregorein", meaning:"警醒、守望", godEn:"Athena", godZh:"雅典娜", domainZh:"警醒與守望", domainEn:"vigilance and watchfulness", coreZh:"警醒", coreEn:"vigilance"},
+  "patrick": {origin:"拉丁文 patricius", meaning:"貴族", godEn:"Hera", godZh:"赫拉", domainZh:"高貴的血統", domainEn:"noble lineage", coreZh:"高貴", coreEn:"nobility"},
+  "alice": {origin:"日耳曼文 adal", meaning:"高貴", godEn:"Hera", godZh:"赫拉", domainZh:"高貴的血統", domainEn:"noble lineage", coreZh:"高貴", coreEn:"nobility"},
+  "martha": {origin:"亞蘭文 marta", meaning:"女主人", godEn:"Hera", godZh:"赫拉", domainZh:"家與婚姻的女主人", domainEn:"the mistress of hearth and marriage", coreZh:"主母", coreEn:"the mistress"},
+  "donna": {origin:"義大利文 domina", meaning:"女士", godEn:"Hera", godZh:"赫拉", domainZh:"貴婦的風範", domainEn:"the grace of a lady", coreZh:"風範", coreEn:"grace"},
+  "sara": {origin:"希伯來文 sarah", meaning:"公主", godEn:"Hera", godZh:"赫拉", domainZh:"王室的尊榮", domainEn:"royal dignity", coreZh:"尊榮", coreEn:"dignity"},
+  "ruth": {origin:"希伯來文 ruth", meaning:"同伴、朋友", godEn:"Hera", godZh:"赫拉", domainZh:"忠實的伴侶", domainEn:"devoted companionship", coreZh:"伴侶", coreEn:"companionship"},
+  "sharon": {origin:"希伯來文 sharon", meaning:"沙崙平原", godEn:"Demeter", godZh:"狄蜜特", domainZh:"肥沃的平原", domainEn:"the fertile plain", coreZh:"平原", coreEn:"the plain"},
+  "melissa": {origin:"希臘文 melissa", meaning:"蜜蜂", godEn:"Demeter", godZh:"狄蜜特", domainZh:"蜂蜜與大地的甜美", domainEn:"honey and the sweetness of earth", coreZh:"蜂蜜", coreEn:"honey", theme:"sweetness"},
+  "deborah": {origin:"希伯來文 devorah", meaning:"蜜蜂", godEn:"Demeter", godZh:"狄蜜特", domainZh:"蜂蜜與大地的甜美", domainEn:"honey and the sweetness of earth", coreZh:"蜂蜜", coreEn:"honey", theme:"sweetness"},
+  "debra": {origin:"希伯來文 devorah", meaning:"蜜蜂", godEn:"Demeter", godZh:"狄蜜特", domainZh:"蜂蜜與大地的甜美", domainEn:"honey and the sweetness of earth", coreZh:"蜂蜜", coreEn:"honey", theme:"sweetness"},
+  "teresa": {origin:"希臘文 theros（字源有爭議）", meaning:"夏日、收穫者", godEn:"Demeter", godZh:"狄蜜特", domainZh:"豐收與大地", domainEn:"harvest and earth", coreZh:"豐收", coreEn:"harvest"},
+  "theresa": {origin:"希臘文 theros（字源有爭議）", meaning:"夏日、收穫者", godEn:"Demeter", godZh:"狄蜜特", domainZh:"豐收與大地", domainEn:"harvest and earth", coreZh:"豐收", coreEn:"harvest"},
+  "evelyn": {origin:"諾曼法文（字源有爭議）", meaning:"渴望之子／榛果", godEn:"Demeter", godZh:"狄蜜特", domainZh:"豐收與大地", domainEn:"harvest and earth", coreZh:"豐收", coreEn:"harvest"},
+  "emily": {origin:"拉丁文 aemulus", meaning:"勤奮、競逐", godEn:"Athena", godZh:"雅典娜", domainZh:"勤奮與競逐", domainEn:"diligence and rivalry", coreZh:"勤奮", coreEn:"diligence", theme:"diligence"},
+  "kimberly": {origin:"古英文 cyne+burh", meaning:"王室的堡壘草原", godEn:"Athena", godZh:"雅典娜", domainZh:"堅定的守護", domainEn:"steadfast protection", coreZh:"守護", coreEn:"protection", theme:"guardian"},
+  "barbara": {origin:"希臘文 barbaros", meaning:"異鄉人、外邦人", godEn:"Hermes", godZh:"赫米斯", domainZh:"異鄉者的旅途", domainEn:"the stranger's journey", coreZh:"異鄉", coreEn:"foreign lands"},
+  "susan": {origin:"希伯來文 shoshannah", meaning:"百合花", godEn:"Persephone", godZh:"波瑟芬妮", domainZh:"百合與春天的甦醒", domainEn:"lilies and the awakening of spring", coreZh:"百合", coreEn:"lilies"},
+  "jessica": {origin:"希伯來文 iscah（莎士比亞創詞）", meaning:"神所看顧", godEn:"Zeus", godZh:"宙斯", domainZh:"洞悉萬物的凝視", domainEn:"the all-seeing gaze", coreZh:"洞悉", coreEn:"insight", theme:"blessing"},
+  "karen": {origin:"希臘文 katharos（Katherine 丹麥變體）", meaning:"純潔", godEn:"Hestia", godZh:"赫斯提亞", domainZh:"純潔與爐火", domainEn:"purity and the hearth", coreZh:"純潔", coreEn:"purity"},
+  "katherine": {origin:"希臘文 katharos", meaning:"純潔", godEn:"Hestia", godZh:"赫斯提亞", domainZh:"純潔與爐火", domainEn:"purity and the hearth", coreZh:"純潔", coreEn:"purity"},
+  "kathryn": {origin:"希臘文 katharos", meaning:"純潔", godEn:"Hestia", godZh:"赫斯提亞", domainZh:"純潔與爐火", domainEn:"purity and the hearth", coreZh:"純潔", coreEn:"purity"},
+  "kathleen": {origin:"希臘文 katharos（愛爾蘭形式）", meaning:"純潔", godEn:"Hestia", godZh:"赫斯提亞", domainZh:"純潔與爐火", domainEn:"purity and the hearth", coreZh:"純潔", coreEn:"purity"},
+  "catherine": {origin:"希臘文 katharos", meaning:"純潔", godEn:"Hestia", godZh:"赫斯提亞", domainZh:"純潔與爐火", domainEn:"purity and the hearth", coreZh:"純潔", coreEn:"purity"},
+  "lisa": {origin:"希伯來文 elisheva（Elizabeth 縮寫）", meaning:"神的誓言", godEn:"Themis", godZh:"忒彌斯", domainZh:"神聖的誓約", domainEn:"a sacred oath", coreZh:"誓約", coreEn:"oaths"},
+  "betty": {origin:"希伯來文 elisheva（Elizabeth 暱稱）", meaning:"神的誓言", godEn:"Themis", godZh:"忒彌斯", domainZh:"神聖的誓約", domainEn:"a sacred oath", coreZh:"誓約", coreEn:"oaths"},
+  "nancy": {origin:"希伯來文 channah（Ann 變體）", meaning:"恩典", godEn:"Charites", godZh:"卡里忒斯", domainZh:"優雅與魅力", domainEn:"grace and charm", coreZh:"優雅", coreEn:"grace"},
+  "anna": {origin:"希伯來文 channah", meaning:"恩典", godEn:"Charites", godZh:"卡里忒斯", domainZh:"優雅與魅力", domainEn:"grace and charm", coreZh:"優雅", coreEn:"grace"},
+  "ann": {origin:"希伯來文 channah", meaning:"恩典", godEn:"Charites", godZh:"卡里忒斯", domainZh:"優雅與魅力", domainEn:"grace and charm", coreZh:"優雅", coreEn:"grace"},
+  "hannah": {origin:"希伯來文 channah", meaning:"恩典", godEn:"Charites", godZh:"卡里忒斯", domainZh:"優雅與魅力", domainEn:"grace and charm", coreZh:"優雅", coreEn:"grace"},
+  "janet": {origin:"希伯來文 yochanan（Jane 變體）", meaning:"神的恩惠", godEn:"Zeus", godZh:"宙斯", domainZh:"神聖的恩寵", domainEn:"divine favor", coreZh:"恩寵", coreEn:"favor", theme:"blessing"},
+  "janice": {origin:"希伯來文 yochanan（Jane 變體）", meaning:"神的恩惠", godEn:"Zeus", godZh:"宙斯", domainZh:"神聖的恩寵", domainEn:"divine favor", coreZh:"恩寵", coreEn:"favor", theme:"blessing"},
+  "jean": {origin:"希伯來文 yochanan（Jane 變體）", meaning:"神的恩惠", godEn:"Zeus", godZh:"宙斯", domainZh:"神聖的恩寵", domainEn:"divine favor", coreZh:"恩寵", coreEn:"favor", theme:"blessing"},
+  "joan": {origin:"希伯來文 yochanan（Jane 變體）", meaning:"神的恩惠", godEn:"Zeus", godZh:"宙斯", domainZh:"神聖的恩寵", domainEn:"divine favor", coreZh:"恩寵", coreEn:"favor", theme:"blessing"},
+  "judith": {origin:"希伯來文 yehudit", meaning:"受讚頌的女子", godEn:"Nike", godZh:"尼姬", domainZh:"受讚頌的凱旋", domainEn:"celebrated triumph", coreZh:"讚頌", coreEn:"celebration", theme:"crown"},
+  "judy": {origin:"希伯來文 yehudit", meaning:"受讚頌的女子", godEn:"Nike", godZh:"尼姬", domainZh:"受讚頌的凱旋", domainEn:"celebrated triumph", coreZh:"讚頌", coreEn:"celebration", theme:"crown"},
+  "samantha": {origin:"亞蘭文（Samuel 陰性形）", meaning:"神所垂聽", godEn:"Apollo", godZh:"阿波羅", domainZh:"神諭與垂聽的祈願", domainEn:"oracles and answered prayer", coreZh:"神諭", coreEn:"the oracle", theme:"sacred"},
+  "samuel": {origin:"希伯來文 shemuel", meaning:"神所垂聽", godEn:"Apollo", godZh:"阿波羅", domainZh:"神諭與垂聽的祈願", domainEn:"oracles and answered prayer", coreZh:"神諭", coreEn:"the oracle", theme:"sacred"},
+  "benjamin": {origin:"希伯來文 binyamin", meaning:"右手之子", godEn:"Nike", godZh:"尼姬", domainZh:"右手的尊榮", domainEn:"the favor of the right hand", coreZh:"尊榮", coreEn:"favor", theme:"crown"},
+  "pamela": {origin:"希臘文 pan+meli（詩人創詞）", meaning:"全然的甜美", godEn:"Aphrodite", godZh:"阿芙蘿黛蒂", domainZh:"全然的甜美與魅力", domainEn:"boundless sweetness and charm", coreZh:"甜美", coreEn:"sweetness"},
+  "angela": {origin:"希臘文 angelos", meaning:"信使", godEn:"Iris", godZh:"伊麗絲", domainZh:"神聖的信使", domainEn:"the divine messenger", coreZh:"信使", coreEn:"the messenger"},
+  "shirley": {origin:"古英文 scir+leah", meaning:"明亮的草原", godEn:"Apollo", godZh:"阿波羅", domainZh:"光明與音樂", domainEn:"light and music", coreZh:"明亮", coreEn:"brightness"},
+  "emma": {origin:"日耳曼文 ermen", meaning:"完整、宏大", godEn:"Zeus", godZh:"宙斯", domainZh:"完整與普世的權柄", domainEn:"wholeness and universal reach", coreZh:"宏大", coreEn:"vastness", theme:"exaltation"},
+  "brenda": {origin:"古諾斯文 brandr", meaning:"劍、烈焰", godEn:"Ares", godZh:"阿瑞斯", domainZh:"劍鋒與戰鬥", domainEn:"the blade and battle", coreZh:"劍鋒", coreEn:"the blade", theme:"spear"},
+  "mia": {origin:"義大利文/北歐文", meaning:"我的、摯愛", godEn:"Aphrodite", godZh:"阿芙蘿黛蒂", domainZh:"被珍視的摯愛", domainEn:"the cherished beloved", coreZh:"摯愛", coreEn:"the beloved"},
+  "ava": {origin:"拉丁文 avis（字源有爭議）", meaning:"鳥", godEn:"Iris", godZh:"伊麗絲", domainZh:"展翅的信使", domainEn:"the winged messenger", coreZh:"羽翼", coreEn:"wings"}
+};
+
+const rootEtymology = [
+  {root:"chrysanth", origin:"希臘字根 chrys-anthos", meaning:"金色花朵", godEn:"Demeter", godZh:"狄蜜特", domainZh:"金黃的花田", domainEn:"fields of golden bloom", coreZh:"金色花田", coreEn:"golden bloom"},
+  {root:"chrys", origin:"希臘字根 chrys-", meaning:"金", godEn:"Plutus", godZh:"普路托斯", domainZh:"黃金與寶藏", domainEn:"gold and hidden wealth", coreZh:"黃金", coreEn:"gold"},
+  {root:"philos", origin:"希臘字根 philo-", meaning:"喜愛、鍾情", godEn:"Aphrodite", godZh:"阿芙蘿黛蒂", domainZh:"愛與傾慕", domainEn:"love and devotion", coreZh:"傾慕", coreEn:"devotion"},
+  {root:"phil", origin:"希臘字根 phil-", meaning:"喜愛、鍾情", godEn:"Aphrodite", godZh:"阿芙蘿黛蒂", domainZh:"愛與傾慕", domainEn:"love and devotion", coreZh:"傾慕", coreEn:"devotion"},
+  {root:"sophi", origin:"希臘字根 soph-", meaning:"智慧", godEn:"Athena", godZh:"雅典娜", domainZh:"智慧與戰略", domainEn:"wisdom and strategy", coreZh:"智慧", coreEn:"wisdom"},
+  {root:"soph", origin:"希臘字根 soph-", meaning:"智慧", godEn:"Athena", godZh:"雅典娜", domainZh:"智慧與戰略", domainEn:"wisdom and strategy", coreZh:"智慧", coreEn:"wisdom"},
+  {root:"andr", origin:"希臘字根 andr-", meaning:"男子氣概、勇氣", godEn:"Ares", godZh:"阿瑞斯", domainZh:"勇氣與戰鬥", domainEn:"courage and battle", coreZh:"勇氣", coreEn:"courage"},
+  {root:"aster", origin:"希臘字根 aster-", meaning:"星辰", godEn:"Nyx", godZh:"倪克斯", domainZh:"星辰與夜色", domainEn:"stars and the night sky", coreZh:"星辰", coreEn:"stars"},
+  {root:"astr", origin:"希臘字根 astr-", meaning:"星辰", godEn:"Nyx", godZh:"倪克斯", domainZh:"星辰與夜色", domainEn:"stars and the night sky", coreZh:"星辰", coreEn:"stars"},
+  {root:"hydro", origin:"希臘字根 hydro-", meaning:"水", godEn:"Poseidon", godZh:"波賽頓", domainZh:"江河與海洋", domainEn:"rivers and the sea", coreZh:"水流", coreEn:"waters"},
+  {root:"pyro", origin:"希臘字根 pyr-", meaning:"火", godEn:"Hephaestus", godZh:"赫菲斯托斯", domainZh:"爐火與鍛造", domainEn:"fire and the forge", coreZh:"爐火", coreEn:"fire"},
+  {root:"pyr", origin:"希臘字根 pyr-", meaning:"火", godEn:"Hephaestus", godZh:"赫菲斯托斯", domainZh:"爐火與鍛造", domainEn:"fire and the forge", coreZh:"爐火", coreEn:"fire"},
+  {root:"nike", origin:"希臘字根 nik-", meaning:"勝利", godEn:"Nike", godZh:"尼姬", domainZh:"勝利與桂冠", domainEn:"victory and laurels", coreZh:"勝利", coreEn:"victory"},
+  {root:"nik", origin:"希臘字根 nik-", meaning:"勝利", godEn:"Nike", godZh:"尼姬", domainZh:"勝利與桂冠", domainEn:"victory and laurels", coreZh:"勝利", coreEn:"victory"},
+  {root:"kalli", origin:"希臘字根 kalli-", meaning:"美", godEn:"Aphrodite", godZh:"阿芙蘿黛蒂", domainZh:"愛與美", domainEn:"love and beauty", coreZh:"美", coreEn:"beauty"},
+  {root:"cal", origin:"希臘字根 kalli-", meaning:"美", godEn:"Aphrodite", godZh:"阿芙蘿黛蒂", domainZh:"愛與美", domainEn:"love and beauty", coreZh:"美", coreEn:"beauty"},
+  {root:"geo", origin:"希臘字根 ge-", meaning:"大地", godEn:"Gaia", godZh:"蓋亞", domainZh:"磐石與大地", domainEn:"bedrock and the earth", coreZh:"大地", coreEn:"the earth"},
+  {root:"terra", origin:"拉丁字根 terra-", meaning:"大地", godEn:"Gaia", godZh:"蓋亞", domainZh:"磐石與大地", domainEn:"bedrock and the earth", coreZh:"大地", coreEn:"the earth"},
+  {root:"terr", origin:"拉丁字根 terr-", meaning:"大地", godEn:"Gaia", godZh:"蓋亞", domainZh:"磐石與大地", domainEn:"bedrock and the earth", coreZh:"大地", coreEn:"the earth"},
+  {root:"lucia", origin:"拉丁字根 luc-", meaning:"光", godEn:"Apollo", godZh:"阿波羅", domainZh:"光明與音樂", domainEn:"light and music", coreZh:"光明", coreEn:"light"},
+  {root:"luc", origin:"拉丁字根 luc-", meaning:"光", godEn:"Apollo", godZh:"阿波羅", domainZh:"光明與音樂", domainEn:"light and music", coreZh:"光明", coreEn:"light"},
+  {root:"photo", origin:"希臘字根 phōs-", meaning:"光", godEn:"Apollo", godZh:"阿波羅", domainZh:"光明與音樂", domainEn:"light and music", coreZh:"光明", coreEn:"light"},
+  {root:"flora", origin:"拉丁字根 flor-", meaning:"花", godEn:"Demeter", godZh:"狄蜜特", domainZh:"豐收與新生的綠意", domainEn:"harvest and new bloom", coreZh:"花開", coreEn:"bloom"},
+  {root:"flor", origin:"拉丁字根 flor-", meaning:"花", godEn:"Demeter", godZh:"狄蜜特", domainZh:"豐收與新生的綠意", domainEn:"harvest and new bloom", coreZh:"花開", coreEn:"bloom"},
+  {root:"solar", origin:"拉丁字根 sol-", meaning:"太陽", godEn:"Helios", godZh:"赫利歐斯", domainZh:"太陽與光輝", domainEn:"sunlight and radiance", coreZh:"陽光", coreEn:"sunlight"},
+  {root:"sol", origin:"拉丁字根 sol-", meaning:"太陽", godEn:"Helios", godZh:"赫利歐斯", domainZh:"太陽與光輝", domainEn:"sunlight and radiance", coreZh:"陽光", coreEn:"sunlight"},
+  {root:"victor", origin:"拉丁字根 vict-", meaning:"勝利", godEn:"Nike", godZh:"尼姬", domainZh:"勝利與桂冠", domainEn:"victory and laurels", coreZh:"勝利", coreEn:"victory"},
+  {root:"vict", origin:"拉丁字根 vict-", meaning:"勝利", godEn:"Nike", godZh:"尼姬", domainZh:"勝利與桂冠", domainEn:"victory and laurels", coreZh:"勝利", coreEn:"victory"},
+  {root:"aurel", origin:"拉丁字根 aur-", meaning:"金", godEn:"Plutus", godZh:"普路托斯", domainZh:"黃金與寶藏", domainEn:"gold and hidden wealth", coreZh:"黃金", coreEn:"gold"},
+  {root:"aur", origin:"拉丁字根 aur-", meaning:"金", godEn:"Plutus", godZh:"普路托斯", domainZh:"黃金與寶藏", domainEn:"gold and hidden wealth", coreZh:"黃金", coreEn:"gold"},
+  {root:"marin", origin:"拉丁字根 mar-", meaning:"海", godEn:"Poseidon", godZh:"波賽頓", domainZh:"江河與海洋", domainEn:"rivers and the sea", coreZh:"海洋", coreEn:"the sea"},
+  {root:"mar", origin:"拉丁字根 mar-", meaning:"海", godEn:"Poseidon", godZh:"波賽頓", domainZh:"江河與海洋", domainEn:"rivers and the sea", coreZh:"海洋", coreEn:"the sea"},
+  {root:"rosa", origin:"拉丁字根 ros-", meaning:"玫瑰", godEn:"Aphrodite", godZh:"阿芙蘿黛蒂", domainZh:"愛與美", domainEn:"love and beauty", coreZh:"玫瑰", coreEn:"roses"},
+  {root:"ros", origin:"拉丁字根 ros-", meaning:"玫瑰", godEn:"Aphrodite", godZh:"阿芙蘿黛蒂", domainZh:"愛與美", domainEn:"love and beauty", coreZh:"玫瑰", coreEn:"roses"},
+  {root:"theo", origin:"希臘字根 theo-", meaning:"神", godEn:"Zeus", godZh:"宙斯", domainZh:"天空與至高的秩序", domainEn:"the sky and divine order", coreZh:"神性", coreEn:"the divine"},
+  {root:"psych", origin:"希臘字根 psych-", meaning:"靈魂、心智", godEn:"Psyche", godZh:"賽姬", domainZh:"靈魂與心智", domainEn:"the soul and the mind", coreZh:"靈魂", coreEn:"the soul"},
+  {root:"phon", origin:"希臘字根 phōn-", meaning:"聲音", godEn:"Apollo", godZh:"阿波羅", domainZh:"樂音與歌聲", domainEn:"music and voice", coreZh:"樂音", coreEn:"music"},
+  {root:"graph", origin:"希臘字根 graph-", meaning:"書寫", godEn:"Calliope", godZh:"卡利俄佩", domainZh:"史詩與書寫", domainEn:"epic and the written word", coreZh:"書寫", coreEn:"the written word"},
+  {root:"gram", origin:"希臘字根 gram-", meaning:"文字", godEn:"Calliope", godZh:"卡利俄佩", domainZh:"史詩與書寫", domainEn:"epic and the written word", coreZh:"書寫", coreEn:"the written word"},
+  {root:"chron", origin:"希臘字根 chron-", meaning:"時間", godEn:"Chronos", godZh:"克羅諾斯", domainZh:"時間的流轉", domainEn:"the passage of time", coreZh:"時間", coreEn:"time"},
+  {root:"cosm", origin:"希臘字根 cosm-", meaning:"秩序、宇宙", godEn:"Zeus", godZh:"宙斯", domainZh:"天空與至高的秩序", domainEn:"the sky and divine order", coreZh:"秩序", coreEn:"cosmic order"},
+  {root:"morph", origin:"希臘字根 morph-", meaning:"形體、夢境", godEn:"Morpheus", godZh:"摩耳甫斯", domainZh:"夢境與變幻的形體", domainEn:"dreams and shifting form", coreZh:"夢境", coreEn:"dreams"},
+  {root:"aeol", origin:"希臘字根 Aeol-", meaning:"風", godEn:"Aeolus", godZh:"艾奧洛斯", domainZh:"風的疆域", domainEn:"the domain of the winds", coreZh:"疾風", coreEn:"the winds"},
+  {root:"anem", origin:"希臘字根 anem-", meaning:"風", godEn:"Aeolus", godZh:"艾奧洛斯", domainZh:"風的疆域", domainEn:"the domain of the winds", coreZh:"疾風", coreEn:"the winds"},
+  {root:"therm", origin:"希臘字根 therm-", meaning:"熱", godEn:"Helios", godZh:"赫利歐斯", domainZh:"太陽與光輝", domainEn:"sunlight and radiance", coreZh:"暖陽", coreEn:"warmth"},
+  {root:"mnem", origin:"希臘字根 mnēm-", meaning:"記憶", godEn:"Mnemosyne", godZh:"謨涅摩緒涅", domainZh:"記憶與繆思的母親", domainEn:"memory and the mother of muses", coreZh:"記憶", coreEn:"memory"},
+  {root:"eros", origin:"希臘字根 erōs-", meaning:"愛慾、渴望", godEn:"Eros", godZh:"厄洛斯", domainZh:"渴望與心動", domainEn:"desire and longing", coreZh:"渴望", coreEn:"desire"},
+  {root:"gam", origin:"希臘字根 gam-", meaning:"婚姻", godEn:"Hera", godZh:"赫拉", domainZh:"婚姻與家庭", domainEn:"marriage and family", coreZh:"婚約", coreEn:"marriage"},
+  {root:"polis", origin:"希臘字根 polis-", meaning:"城邦", godEn:"Athena", godZh:"雅典娜", domainZh:"城邦與公民秩序", domainEn:"the city and civic order", coreZh:"城邦", coreEn:"the city"},
+  {root:"naut", origin:"希臘字根 naut-", meaning:"航海者", godEn:"Poseidon", godZh:"波賽頓", domainZh:"江河與海洋", domainEn:"rivers and the sea", coreZh:"航行", coreEn:"seafaring"},
+  {root:"corv", origin:"拉丁字根 corv-", meaning:"渡鴉", godEn:"Apollo", godZh:"阿波羅", domainZh:"預兆與先知之鳥", domainEn:"omens and the prophetic bird", coreZh:"預兆", coreEn:"omens"},
+  {root:"columb", origin:"拉丁字根 columb-", meaning:"鴿子", godEn:"Aphrodite", godZh:"阿芙蘿黛蒂", domainZh:"愛與美", domainEn:"love and beauty", coreZh:"愛的信物", coreEn:"tokens of love"},
+  {root:"hippo", origin:"希臘字根 hippo-", meaning:"馬", godEn:"Poseidon", godZh:"波賽頓", domainZh:"馬匹與海洋", domainEn:"horses and the sea", coreZh:"駿馬", coreEn:"horses"},
+  {root:"somn", origin:"拉丁字根 somn-", meaning:"睡眠", godEn:"Hypnos", godZh:"修普諾斯", domainZh:"沉睡與夢境的邊界", domainEn:"sleep and the edge of dreams", coreZh:"沉睡", coreEn:"sleep"},
+  {root:"noct", origin:"拉丁字根 noct-", meaning:"夜", godEn:"Nyx", godZh:"倪克斯", domainZh:"星辰與夜色", domainEn:"stars and the night sky", coreZh:"夜色", coreEn:"the night"},
+  {root:"luna", origin:"拉丁字根 lun-", meaning:"月亮", godEn:"Selene", godZh:"賽勒涅", domainZh:"月光與夜行", domainEn:"moonlight and the night journey", coreZh:"月光", coreEn:"moonlight"},
+  {root:"lun", origin:"拉丁字根 lun-", meaning:"月亮", godEn:"Selene", godZh:"賽勒涅", domainZh:"月光與夜行", domainEn:"moonlight and the night journey", coreZh:"月光", coreEn:"moonlight"},
+  {root:"stell", origin:"拉丁字根 stell-", meaning:"星辰", godEn:"Nyx", godZh:"倪克斯", domainZh:"星辰與夜色", domainEn:"stars and the night sky", coreZh:"星辰", coreEn:"stars"},
+  {root:"ignis", origin:"拉丁字根 ign-", meaning:"火", godEn:"Hephaestus", godZh:"赫菲斯托斯", domainZh:"爐火與鍛造", domainEn:"fire and the forge", coreZh:"爐火", coreEn:"fire"},
+  {root:"vent", origin:"拉丁字根 vent-", meaning:"風", godEn:"Aeolus", godZh:"艾奧洛斯", domainZh:"風的疆域", domainEn:"the domain of the winds", coreZh:"疾風", coreEn:"the winds"},
+  {root:"cordi", origin:"拉丁字根 cord-", meaning:"心", godEn:"Eros", godZh:"厄洛斯", domainZh:"渴望與心動", domainEn:"desire and longing", coreZh:"心動", coreEn:"the heart"},
+  {root:"grati", origin:"拉丁字根 grat-", meaning:"恩典、優雅", godEn:"Charites", godZh:"卡里忒斯", domainZh:"優雅與魅力", domainEn:"grace and charm", coreZh:"優雅", coreEn:"grace"},
+  {root:"justi", origin:"拉丁字根 just-", meaning:"正義", godEn:"Themis", godZh:"忒彌斯", domainZh:"律法與正義", domainEn:"law and justice", coreZh:"正義", coreEn:"justice"},
+  {root:"regi", origin:"拉丁字根 reg-", meaning:"統治", godEn:"Zeus", godZh:"宙斯", domainZh:"天空與至高的秩序", domainEn:"the sky and divine order", coreZh:"王權", coreEn:"kingship"},
+  {root:"jah", origin:"希伯來字根 -yah", meaning:"神", godEn:"Zeus", godZh:"宙斯", domainZh:"神聖的恩寵", domainEn:"divine favor", coreZh:"恩寵", coreEn:"favor"},
+  {root:"iah", origin:"希伯來字根 -iah", meaning:"神", godEn:"Zeus", godZh:"宙斯", domainZh:"神聖的恩寵", domainEn:"divine favor", coreZh:"恩寵", coreEn:"favor"},
+  {root:"beth", origin:"希伯來字根 beth-", meaning:"家、屋", godEn:"Hestia", godZh:"赫斯提亞", domainZh:"爐火與家", domainEn:"hearth and home", coreZh:"爐火", coreEn:"the hearth"},
+  {root:"fried", origin:"日耳曼字根 fried-", meaning:"和平", godEn:"Eirene", godZh:"厄瑞涅", domainZh:"和平與寧靜", domainEn:"peace and calm", coreZh:"寧靜", coreEn:"calm"},
+  {root:"frid", origin:"日耳曼字根 frid-", meaning:"和平", godEn:"Eirene", godZh:"厄瑞涅", domainZh:"和平與寧靜", domainEn:"peace and calm", coreZh:"寧靜", coreEn:"calm"},
+  {root:"hild", origin:"日耳曼字根 hild-", meaning:"戰鬥", godEn:"Ares", godZh:"阿瑞斯", domainZh:"勇氣與戰鬥", domainEn:"courage and battle", coreZh:"勇氣", coreEn:"courage"},
+  {root:"wolf", origin:"日耳曼字根 wolf-", meaning:"狼", godEn:"Artemis", godZh:"阿蒂蜜絲", domainZh:"狼群與荒野的謀略", domainEn:"wolves and wild counsel", coreZh:"狼群", coreEn:"wolves"},
+  {root:"bert", origin:"日耳曼字根 berht-", meaning:"光耀、明亮", godEn:"Apollo", godZh:"阿波羅", domainZh:"光輝與聲名", domainEn:"radiance and renown", coreZh:"光輝", coreEn:"radiance"},
+  {root:"rich", origin:"日耳曼字根 ric-", meaning:"統治者", godEn:"Zeus", godZh:"宙斯", domainZh:"至高的統治意志", domainEn:"the supreme will to rule", coreZh:"統治", coreEn:"rule"},
+  {root:"wald", origin:"日耳曼字根 wald-", meaning:"統治、力量", godEn:"Ares", godZh:"阿瑞斯", domainZh:"軍旅的統帥", domainEn:"command of the army", coreZh:"統帥", coreEn:"command"},
+  {root:"mund", origin:"日耳曼字根 mund-", meaning:"守護者", godEn:"Athena", godZh:"雅典娜", domainZh:"睿智的謀略", domainEn:"wise counsel", coreZh:"謀略", coreEn:"counsel"},
+  {root:"helm", origin:"日耳曼字根 helm-", meaning:"頭盔、守護", godEn:"Athena", godZh:"雅典娜", domainZh:"堅定的守護", domainEn:"steadfast protection", coreZh:"守護", coreEn:"protection"},
+  {root:"gard", origin:"日耳曼字根 gard-", meaning:"守衛、庭院", godEn:"Athena", godZh:"雅典娜", domainZh:"堅定的守護", domainEn:"steadfast protection", coreZh:"守護", coreEn:"protection"},
+  {root:"stan", origin:"古英文字根 stan-", meaning:"石頭", godEn:"Gaia", godZh:"蓋亞", domainZh:"磐石與大地", domainEn:"bedrock and the earth", coreZh:"磐石", coreEn:"bedrock"},
+  {root:"hard", origin:"日耳曼字根 hard-", meaning:"堅毅、勇猛", godEn:"Ares", godZh:"阿瑞斯", domainZh:"勇氣與戰鬥", domainEn:"courage and battle", coreZh:"勇氣", coreEn:"courage"},
+  {root:"win", origin:"古英文字根 wine-", meaning:"朋友", godEn:"Charites", godZh:"卡里忒斯", domainZh:"優雅與魅力", domainEn:"grace and charm", coreZh:"友愛", coreEn:"friendship"},
+  {root:"sar", origin:"希伯來字根 sar-", meaning:"公主、王后", godEn:"Hera", godZh:"赫拉", domainZh:"王室的尊榮", domainEn:"royal dignity", coreZh:"尊榮", coreEn:"dignity"},
+  {root:"rapha", origin:"希伯來字根 rapha-", meaning:"療癒", godEn:"Apollo", godZh:"阿波羅", domainZh:"救贖與療癒", domainEn:"deliverance and healing", coreZh:"療癒", coreEn:"healing"},
+  {root:"el", origin:"希伯來字根 -el", meaning:"神", godEn:"Zeus", godZh:"宙斯", domainZh:"神聖的恩寵", domainEn:"divine favor", coreZh:"恩寵", coreEn:"favor"},
+  {root:"mir", origin:"斯拉夫字根 mir-", meaning:"和平", godEn:"Eirene", godZh:"厄瑞涅", domainZh:"和平與寧靜", domainEn:"peace and calm", coreZh:"寧靜", coreEn:"calm"},
+  {root:"vlad", origin:"斯拉夫字根 vlad-", meaning:"統治", godEn:"Zeus", godZh:"宙斯", domainZh:"至高的統治意志", domainEn:"the supreme will to rule", coreZh:"統治", coreEn:"rule"},
+  {root:"slav", origin:"斯拉夫字根 slav-", meaning:"榮耀", godEn:"Nike", godZh:"尼姬", domainZh:"榮耀與勝利", domainEn:"glory and victory", coreZh:"榮耀", coreEn:"glory"},
+  {root:"nur", origin:"阿拉伯字根 nur-", meaning:"光", godEn:"Apollo", godZh:"阿波羅", domainZh:"光明與音樂", domainEn:"light and music", coreZh:"光明", coreEn:"light"},
+  {root:"aziz", origin:"阿拉伯字根 aziz-", meaning:"強大、珍愛", godEn:"Zeus", godZh:"宙斯", domainZh:"至高的統治意志", domainEn:"the supreme will to rule", coreZh:"威嚴", coreEn:"majesty"},
+  {root:"malik", origin:"阿拉伯字根 malik-", meaning:"王", godEn:"Zeus", godZh:"宙斯", domainZh:"至高的統治意志", domainEn:"the supreme will to rule", coreZh:"統治", coreEn:"rule"},
+  {root:"amir", origin:"阿拉伯字根 amir-", meaning:"王子、統帥", godEn:"Ares", godZh:"阿瑞斯", domainZh:"軍旅的統帥", domainEn:"command of the army", coreZh:"統帥", coreEn:"command"},
+  {root:"deva", origin:"梵文字根 deva-", meaning:"神、天神", godEn:"Zeus", godZh:"宙斯", domainZh:"天空與至高的秩序", domainEn:"the sky and divine order", coreZh:"神性", coreEn:"the divine"},
+  {root:"priya", origin:"梵文字根 priya-", meaning:"摯愛", godEn:"Aphrodite", godZh:"阿芙蘿黛蒂", domainZh:"愛與美", domainEn:"love and beauty", coreZh:"愛", coreEn:"love"},
+  {root:"raj", origin:"梵文字根 raj-", meaning:"王、統治", godEn:"Zeus", godZh:"宙斯", domainZh:"至高的統治意志", domainEn:"the supreme will to rule", coreZh:"統治", coreEn:"rule"},
+  {root:"anand", origin:"梵文字根 ananda-", meaning:"喜悅、極樂", godEn:"Dionysus", godZh:"戴歐尼修斯", domainZh:"酒與狂歡", domainEn:"wine and revelry", coreZh:"喜悅", coreEn:"joy"},
+  {root:"belle", origin:"法文字根 belle-", meaning:"美麗", godEn:"Aphrodite", godZh:"阿芙蘿黛蒂", domainZh:"愛與美", domainEn:"love and beauty", coreZh:"美", coreEn:"beauty"},
+  {root:"cari", origin:"凱爾特字根 cari-", meaning:"摯愛的朋友", godEn:"Charites", godZh:"卡里忒斯", domainZh:"優雅與魅力", domainEn:"grace and charm", coreZh:"友愛", coreEn:"friendship"},
+  {root:"wood", origin:"古英文字根 wudu-", meaning:"森林", godEn:"Pan", godZh:"潘", domainZh:"荒野與森林", domainEn:"the wild woodland", coreZh:"森林", coreEn:"the woodland"},
+  {root:"field", origin:"古英文字根 feld-", meaning:"田野", godEn:"Demeter", godZh:"狄蜜特", domainZh:"豐收與大地", domainEn:"harvest and earth", coreZh:"豐收", coreEn:"harvest"},
+  {root:"brook", origin:"古英文字根 broc-", meaning:"溪流", godEn:"Poseidon", godZh:"波賽頓", domainZh:"江河與海洋", domainEn:"rivers and the sea", coreZh:"溪流", coreEn:"streams"},
+  {root:"ford", origin:"古英文字根 ford-", meaning:"河渡口", godEn:"Poseidon", godZh:"波賽頓", domainZh:"江河與海洋", domainEn:"rivers and the sea", coreZh:"河流", coreEn:"rivers"},
+  {root:"stone", origin:"古英文字根 stan-", meaning:"石頭", godEn:"Gaia", godZh:"蓋亞", domainZh:"磐石與大地", domainEn:"bedrock and the earth", coreZh:"磐石", coreEn:"bedrock"},
+  {root:"hill", origin:"古英文字根 hyll-", meaning:"山丘", godEn:"Gaia", godZh:"蓋亞", domainZh:"磐石與大地", domainEn:"bedrock and the earth", coreZh:"山丘", coreEn:"hills"},
+  {root:"worth", origin:"古英文字根 worth-", meaning:"價值、莊園", godEn:"Plutus", godZh:"普路托斯", domainZh:"黃金與寶藏", domainEn:"gold and hidden wealth", coreZh:"價值", coreEn:"worth"},
+  {root:"viv", origin:"拉丁字根 viv-", meaning:"生命、活力", godEn:"Hebe", godZh:"赫柏", domainZh:"永恆的青春", domainEn:"eternal youth", coreZh:"生命力", coreEn:"vitality"},
+  {root:"paci", origin:"拉丁字根 pax-", meaning:"和平", godEn:"Eirene", godZh:"厄瑞涅", domainZh:"和平與寧靜", domainEn:"peace and calm", coreZh:"寧靜", coreEn:"calm"},
+  {root:"fort", origin:"拉丁字根 fortis-", meaning:"強壯、勇敢", godEn:"Ares", godZh:"阿瑞斯", domainZh:"勇氣與戰鬥", domainEn:"courage and battle", coreZh:"勇氣", coreEn:"courage"},
+  {root:"bene", origin:"拉丁字根 bene-", meaning:"良善、祝福", godEn:"Charites", godZh:"卡里忒斯", domainZh:"優雅與魅力", domainEn:"grace and charm", coreZh:"良善", coreEn:"goodness"},
+  {root:"magn", origin:"拉丁字根 magnus-", meaning:"偉大", godEn:"Zeus", godZh:"宙斯", domainZh:"至高的統治意志", domainEn:"the supreme will to rule", coreZh:"威嚴", coreEn:"majesty"},
+  {root:"cael", origin:"拉丁字根 caelum-", meaning:"天空", godEn:"Zeus", godZh:"宙斯", domainZh:"天空與至高的秩序", domainEn:"the sky and divine order", coreZh:"天穹", coreEn:"the heavens"},
+  {root:"seren", origin:"拉丁字根 serenus-", meaning:"平靜、晴朗", godEn:"Eirene", godZh:"厄瑞涅", domainZh:"和平與寧靜", domainEn:"peace and calm", coreZh:"寧靜", coreEn:"calm"},
+  {root:"veri", origin:"拉丁字根 verus-", meaning:"真實", godEn:"Themis", godZh:"忒彌斯", domainZh:"律法與正義", domainEn:"law and justice", coreZh:"真實", coreEn:"truth"},
+  {root:"domin", origin:"拉丁字根 dominus-", meaning:"主、領主", godEn:"Zeus", godZh:"宙斯", domainZh:"至高的統治意志", domainEn:"the supreme will to rule", coreZh:"統治", coreEn:"rule"},
+  {root:"matr", origin:"拉丁字根 mater-", meaning:"母親", godEn:"Demeter", godZh:"狄蜜特", domainZh:"豐收與大地", domainEn:"harvest and earth", coreZh:"母性", coreEn:"motherhood"},
+  {root:"amor", origin:"拉丁字根 amor-", meaning:"愛", godEn:"Aphrodite", godZh:"阿芙蘿黛蒂", domainZh:"愛與美", domainEn:"love and beauty", coreZh:"愛", coreEn:"love"},
+  {root:"beat", origin:"拉丁字根 beatus-", meaning:"受祝福的、快樂的", godEn:"Dionysus", godZh:"戴歐尼修斯", domainZh:"酒與狂歡", domainEn:"wine and revelry", coreZh:"喜悅", coreEn:"joy"},
+  {root:"fortun", origin:"拉丁字根 fortuna-", meaning:"命運、幸運", godEn:"Tyche", godZh:"堤喀", domainZh:"幸運與機緣", domainEn:"fortune and chance", coreZh:"幸運", coreEn:"fortune"}
+];
+
+const godNameZh = {
+  Hephaestus:"赫菲斯托斯", Plutus:"普路托斯", Athena:"雅典娜", Ares:"阿瑞斯", Aphrodite:"阿芙蘿黛蒂",
+  Eros:"厄洛斯", Hebe:"赫柏", Zeus:"宙斯", Poseidon:"波賽頓", Apollo:"阿波羅", Helios:"赫利歐斯",
+  Demeter:"狄蜜特", Persephone:"波瑟芬妮", Hestia:"赫斯提亞", Hera:"赫拉", Artemis:"阿蒂蜜絲",
+  Nike:"尼姬", Themis:"忒彌斯", Hermes:"赫米斯", Nyx:"倪克斯", Selene:"賽勒涅", Hypnos:"修普諾斯",
+  Morpheus:"摩耳甫斯", Chronos:"克羅諾斯", Tyche:"堤喀", Atlas:"阿特拉斯", Mnemosyne:"謨涅摩緒涅",
+  Dionysus:"戴歐尼修斯", Iris:"伊麗絲", Calliope:"卡利俄佩", Eirene:"厄瑞涅", Charites:"卡里忒斯",
+  Gaia:"蓋亞", Eos:"厄俄斯", Psyche:"賽姬",
+  Erebus:"厄瑞玻斯", Hemera:"赫墨拉", Hecate:"赫卡忒", Nemesis:"涅墨西斯", Thalassa:"塔拉薩", Boreas:"玻瑞阿斯",
+  Notos:"諾托斯", Zephyrus:"澤費羅斯", Physis:"菲西斯", Ker:"刻爾", Metis:"墨提斯", Harmonia:"哈耳摩尼亞"
+};
+
+const godDefaultDomain = {
+  Hephaestus:{zh:"鍛造與工藝", en:"the forge and craft"},
+  Plutus:{zh:"黃金與寶藏", en:"gold and hidden wealth"},
+  Athena:{zh:"智慧與戰略", en:"wisdom and strategy"},
+  Ares:{zh:"勇氣與戰鬥", en:"courage and battle"},
+  Aphrodite:{zh:"愛與美", en:"love and beauty"},
+  Eros:{zh:"渴望與心動", en:"desire and longing"},
+  Hebe:{zh:"永恆的青春", en:"eternal youth"},
+  Zeus:{zh:"天空與至高的秩序", en:"the sky and divine order"},
+  Poseidon:{zh:"江河與海洋", en:"rivers and the sea"},
+  Apollo:{zh:"光明與音樂", en:"light and music"},
+  Helios:{zh:"太陽與光輝", en:"sunlight and radiance"},
+  Demeter:{zh:"豐收與大地", en:"harvest and earth"},
+  Persephone:{zh:"冥后與春天的甦醒", en:"spring and the underworld"},
+  Hestia:{zh:"爐火與家", en:"hearth and home"},
+  Hera:{zh:"婚姻與家庭", en:"marriage and family"},
+  Artemis:{zh:"月光與狩獵", en:"moonlight and the hunt"},
+  Nike:{zh:"勝利與桂冠", en:"victory and laurels"},
+  Themis:{zh:"律法與正義", en:"law and justice"},
+  Hermes:{zh:"旅途與詭計", en:"travel and cunning"},
+  Nyx:{zh:"星辰與夜色", en:"stars and the night sky"},
+  Selene:{zh:"月光與夜行", en:"moonlight and the night journey"},
+  Hypnos:{zh:"沉睡與夢境", en:"sleep and dreams"},
+  Morpheus:{zh:"夢境與變幻的形體", en:"dreams and shifting form"},
+  Chronos:{zh:"時間的流轉", en:"the passage of time"},
+  Tyche:{zh:"幸運與機緣", en:"fortune and chance"},
+  Atlas:{zh:"承載天穹的重量", en:"bearing the weight of the sky"},
+  Mnemosyne:{zh:"記憶與繆思之母", en:"memory and the mother of muses"},
+  Dionysus:{zh:"酒與狂歡", en:"wine and revelry"},
+  Iris:{zh:"彩虹與信使", en:"the rainbow and messages"},
+  Calliope:{zh:"史詩與書寫", en:"epic and the written word"},
+  Eirene:{zh:"和平與寧靜", en:"peace and calm"},
+  Charites:{zh:"優雅與魅力", en:"grace and charm"},
+  Gaia:{zh:"磐石與大地", en:"bedrock and the earth"},
+  Eos:{zh:"新生的黎明", en:"the dawn of new beginnings"},
+  Psyche:{zh:"靈魂與心智", en:"the soul and the mind"},
+  Erebus:{zh:"幽影與未知的深處", en:"shadow and the unknown depths"},
+  Hemera:{zh:"晝光與甦醒的世界", en:"daylight and the waking world"},
+  Hecate:{zh:"魔法與十字路口", en:"magic and the crossroads"},
+  Nemesis:{zh:"因果與平衡", en:"balance and reckoning"},
+  Thalassa:{zh:"原初的海", en:"the primordial sea"},
+  Boreas:{zh:"北風與凜冽", en:"the north wind and cold"},
+  Notos:{zh:"南風與善變", en:"the south wind and change"},
+  Zephyrus:{zh:"西風與輕柔的擾動", en:"the west wind and gentle disturbance"},
+  Physis:{zh:"自然的生長之力", en:"the growing force of nature"},
+  Ker:{zh:"命運的定局", en:"the settled thread of fate"},
+  Metis:{zh:"深謀遠慮", en:"deep foresight and cunning"},
+  Harmonia:{zh:"和諧與平衡", en:"harmony and balance"}
+};
+
+const fallbackOrigins = [
+  "查無明確的希臘／拉丁字根",
+  "字源記載不完整",
+  "尚未收錄於希臘語系字典",
+  "跨越多種語言，字源難以追溯",
+  "字源眾說紛紜，尚無定論"
+];
+
+function getEtymology(raw){
+  const lower = raw.toLowerCase().trim();
+  if(exactEtymology[lower]) return exactEtymology[lower];
+  if(lower === "hassan"){
+    const dom = godDefaultDomain["Nyx"];
+    return {
+      origin: fallbackOrigins[0],
+      meaning: "尚未被記載的意義",
+      godEn: "Nyx",
+      godZh: godNameZh["Nyx"],
+      domainZh: dom.zh,
+      domainEn: dom.en,
+      coreZh: dom.zh,
+      coreEn: dom.en
+    };
+  }
+  const base = transliterate(raw);
+  const sortedRoots = rootEtymology.slice().sort((a,b)=> b.root.length - a.root.length);
+  for(const r of sortedRoots){
+    if(base.includes(r.root)) return r;
+  }
+  const godEn = fallbackOnlyGods[hashStr(base + "|fallbackgod") % fallbackOnlyGods.length];
+  const dom = godDefaultDomain[godEn];
+  const origin = fallbackOrigins[hashStr(base + "|fallbackorigin") % fallbackOrigins.length];
+  return {
+    origin,
+    meaning:"尚未被記載的意義",
+    godEn,
+    godZh: godNameZh[godEn],
+    domainZh: dom.zh,
+    domainEn: dom.en,
+    coreZh: dom.zh,
+    coreEn: dom.en
+  };
+}
+
+function hashStr(str){
+  let h = 2166136261 >>> 0;
+  for(let i=0;i<str.length;i++){
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619) >>> 0;
+  }
+  return h >>> 0;
+}
+
+function transliterate(raw){
+  let s = raw.toLowerCase().replace(/[^a-z]/g,"");
+  if(!s) return "";
+  s = s.replace(/ck/g,"k").replace(/q/g,"k").replace(/w/g,"ou").replace(/v/g,"b").replace(/x/g,"ks");
+  return s;
+}
+
+function detectGender(raw){
+  const lower = raw.toLowerCase().trim();
+  if(femaleNames.includes(lower)) return "female";
+  if(maleNames.includes(lower)) return "male";
+  if(/(a|ia|ella|etta|ie|lyn|beth|elle|ette)$/.test(lower)) return "female";
+  if(/(us|er|on|an|ander|ios|o)$/.test(lower)) return "male";
+  return "neutral";
+}
+
+function buildGreekName(raw, gender, salt, maxCount){
+  const base = transliterate(raw);
+  if(!base) return {name:"", suffixIdx:0};
+  const fullPool = gender === "female" ? suffixFemale : gender === "male" ? suffixMale : suffixNeutral;
+  const pool = fullPool.slice(0, Math.max(1, maxCount || fullPool.length));
+  const h = hashStr(base + "|" + gender + "|" + salt);
+  const suffixIdx = h % pool.length;
+  const suffix = pool[suffixIdx];
+  const lastChar = base[base.length-1];
+  let joined;
+  if(vowels.includes(lastChar) && vowels.includes(suffix[0])){
+    const c = connectors[suffixIdx % connectors.length];
+    joined = base + c + suffix;
+  } else if(!vowels.includes(lastChar) && !vowels.includes(suffix[0])){
+    joined = base + "e" + suffix;
+  } else {
+    joined = base + suffix;
+  }
+  return {name: joined.charAt(0).toUpperCase() + joined.slice(1), suffixIdx};
+}
+
+let currentSalt = 0;
+
+const nameOverrides = {
+  "gemma": [
+    {name:"Gemmayris", modEn:"Never Not Sparkling", modZh:"從不失去光澤的"},
+    {name:"Gemmanadne", modEn:"Batting Eyelashes", modZh:"拋媚眼的"},
+    {name:"Gemmanayus", modEn:"Secretly Hoarding", modZh:"偷偷囤貨的"},
+    {name:"Gemmalopeia", modEn:"Suspiciously Organized", modZh:"可疑的井井有條"},
+    {name:"Gemmasantha", modEn:"Quietly Possessive", modZh:"悄悄佔有慾強的"}
+  ]
+};
+
+const classicPatronTemplates = [
+  (godZh, domainZh) => `承襲${godZh}的職掌 · ${domainZh}`,
+  (godZh, domainZh) => `${godZh}親自認可的血脈 · 象徵${domainZh}`,
+  (godZh, domainZh) => `在${godZh}的注視下成長，繼承了${domainZh}的天賦`,
+  (godZh, domainZh) => `${domainZh}，是${godZh}留給後代的印記`
+];
+
+function renderClassic(raw){
+  const gender = detectGender(raw);
+  const ety = getEtymology(raw);
+  const built = buildGreekName(raw, gender, 0);
+
+  let titleEnNoun, titleZhBare;
+  if(gender === "male"){ titleEnNoun = "God"; titleZhBare = "神"; }
+  else if(gender === "female"){ titleEnNoun = "Goddess"; titleZhBare = "女神"; }
+  else { titleEnNoun = "Deity"; titleZhBare = "神祇"; }
+
+  const tplIdx = built.suffixIdx % classicPatronTemplates.length;
+
+  const override = nameOverrides[raw.toLowerCase().trim()];
+  const displayName = override ? override[0].name : built.name;
+
+  document.getElementById('outName').textContent = displayName;
+  document.getElementById('outLineEn').textContent = `${titleEnNoun} of ${ety.domainEn}`;
+  document.getElementById('outLineZh').textContent = `${ety.domainZh}${titleZhBare}`;
+  document.getElementById('outEtymology').textContent = `字源 · ${ety.origin}，意為「${ety.meaning}」`;
+  document.getElementById('outPatron').textContent = classicPatronTemplates[tplIdx](ety.godZh, ety.domainZh);
+  document.getElementById('result').classList.add('show');
+}
+
+function renderPlayful(raw){
+  const gender = detectGender(raw);
+  const ety = getEtymology(raw);
+  const themePool = getThemePool(ety);
+  const built = buildGreekName(raw, gender, currentSalt, themePool.length);
+
+  let titleEnNoun, titleZhBare;
+  if(gender === "male"){ titleEnNoun = "God"; titleZhBare = "神"; }
+  else if(gender === "female"){ titleEnNoun = "Goddess"; titleZhBare = "女神"; }
+  else { titleEnNoun = "Deity"; titleZhBare = "神祇"; }
+
+  const override = nameOverrides[raw.toLowerCase().trim()];
+  let displayName, modEn, modZh;
+  if(override){
+    const pick = override[currentSalt % override.length];
+    displayName = pick.name; modEn = pick.modEn; modZh = pick.modZh;
+  } else {
+    displayName = built.name;
+    [modEn, modZh] = (function(){
+      const orderSeed = hashStr(transliterate(raw) + "|" + gender + "|modorder|" + (ety.theme || godTheme[ety.godEn] || fallbackGodTheme[ety.godEn] || "__generic__"));
+      const orderedPool = seededShuffle(themePool, orderSeed);
+      return orderedPool[built.suffixIdx];
+    })();
+  }
+  const trickster = getTrickster(ety);
+
+  document.getElementById('outName').textContent = displayName;
+  document.getElementById('outLineEn').textContent = `${modEn} ${titleEnNoun}`;
+  document.getElementById('outLineZh').textContent = `${modZh}${titleZhBare}`;
+  document.getElementById('outEtymology').textContent = `字源 · ${ety.origin}，意為「${ety.meaning}」`;
+  document.getElementById('outPatron').textContent = `由惡作劇之神${trickster.zh}（${trickster.tag}）欽點`;
+  document.getElementById('result').classList.add('show');
+}
+
+let currentMode = null;
+
+document.getElementById('nameBtn').addEventListener('click', ()=>{
+  const raw = document.getElementById('nameInput').value.trim();
+  if(!raw) return;
+  currentMode = 'classic';
+  currentSalt = 0;
+  renderClassic(raw);
+});
+
+document.getElementById('rerollBtn').addEventListener('click', ()=>{
+  const raw = document.getElementById('nameInput').value.trim();
+  if(!raw || !currentMode) return;
+  if(currentMode === 'classic'){
+    currentMode = 'playful';
+    currentSalt = 1;
+    renderPlayful(raw);
+  } else {
+    currentSalt += 1;
+    renderPlayful(raw);
+  }
+});
+
+document.getElementById('nameInput').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){
+    const raw = document.getElementById('nameInput').value.trim();
+    if(!raw) return;
+    currentMode = 'classic';
+    currentSalt = 0;
+    renderClassic(raw);
+  }
+});
+
+async function captureCard(){
+  if(typeof html2canvas === 'undefined'){
+    alert('圖片截圖功能載入失敗，可能是網路限制或瀏覽器擋掉了外部資源，請確認網路連線後重新整理頁面再試一次');
+    return null;
+  }
+  const node = document.getElementById('shareCard');
+  try{
+    const canvas = await html2canvas(node, {
+      backgroundColor: '#EADFC4',
+      scale: 3,
+      useCORS: true,
+      allowTaint: false
+    });
+    return canvas;
+  }catch(err){
+    console.error('html2canvas failed:', err);
+    alert('截圖失敗了，可能是網路或瀏覽器限制造成的，可以試試看重新整理頁面，或直接對這個結果卡截圖分享');
+    return null;
+  }
+}
+
+function canvasToBlob(canvas){
+  return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+}
+
+document.getElementById('downloadBtn').addEventListener('click', async ()=>{
+  const nameText = document.getElementById('outName').textContent || 'greek-name';
+  const canvas = await captureCard();
+  if(!canvas) return;
+  const link = document.createElement('a');
+  link.download = `${nameText}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+});
+
+document.getElementById('shareBtn').addEventListener('click', async ()=>{
+  const nameText = document.getElementById('outName').textContent || 'greek-name';
+  const canvas = await captureCard();
+  if(!canvas) return;
+  const blob = await canvasToBlob(canvas);
+  if(!blob){
+    alert('圖片產生失敗，請再試一次');
+    return;
+  }
+  const file = new File([blob], `${nameText}.png`, {type:'image/png'});
+
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    try{
+      await navigator.share({
+        files:[file],
+        title:'我的希臘名字',
+        text:`我的希臘名字是 ${nameText}`
+      });
+      return;
+    }catch(err){
+      if(err && err.name === 'AbortError') return;
+      console.error('share failed:', err);
+    }
+  }
+  const link = document.createElement('a');
+  link.download = `${nameText}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  alert('這個瀏覽器不支援直接分享，圖片已經幫你下載，可以手動上傳到 Instagram / Facebook / Threads');
+});
+</script>
+</body>
+</html>
