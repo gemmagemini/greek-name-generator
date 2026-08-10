@@ -168,12 +168,24 @@
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    padding:32px 24px;
+    padding:28px 24px;
     box-sizing:border-box;
     background:var(--papyrus);
-    border:1px solid var(--gold-line);
-    border-radius:4px;
+    border:4px double var(--gold);
+    border-radius:2px;
     text-align:center;
+    position:relative;
+  }
+  .share-key-strip{
+    width:100%;
+    max-width:180px;
+    opacity:0.7;
+    margin:6px 0;
+  }
+  .share-key-strip svg{
+    width:100%;
+    height:12px;
+    display:block;
   }
   .share-title{
     font-size:12px;
@@ -205,27 +217,58 @@
     gap:10px;
     margin-top:12px;
   }
-  .format-row{
+  .format-modal-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(26,18,16,0.55);
+    z-index:1000;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .format-modal-overlay.show{
     display:flex;
-    gap:8px;
-    margin-top:20px;
   }
-  .format-pill{
-    flex:1;
-    text-align:center;
-    padding:8px 4px;
-    font-size:12.5px;
-    border:1px solid var(--gold-line);
-    border-radius:20px;
-    cursor:pointer;
-    color:var(--ink-soft);
+  .format-modal{
     background:var(--papyrus);
-    user-select:none;
+    border:1px solid var(--gold-line);
+    border-radius:4px;
+    padding:24px;
+    max-width:320px;
+    width:100%;
+    text-align:center;
   }
-  .format-pill.active{
+  .format-modal p{
+    font-size:14px;
+    color:var(--ink-soft);
+    margin:0 0 18px;
+  }
+  .format-modal-btn{
+    width:100%;
+    padding:13px 8px;
+    margin-bottom:10px;
+    font-family:'Noto Serif TC', serif;
+    font-size:15px;
+    font-weight:600;
     background:var(--terracotta);
-    border-color:var(--terracotta);
     color:var(--papyrus);
+    border:1px solid var(--terracotta);
+    border-radius:3px;
+    cursor:pointer;
+  }
+  .format-modal-btn:hover{
+    background:var(--terracotta-deep);
+  }
+  .format-modal-cancel{
+    background:none;
+    border:none;
+    color:var(--gold);
+    font-size:13px;
+    text-decoration:underline;
+    cursor:pointer;
+    margin-top:4px;
+    padding:6px;
   }
   .action-btn{
     flex:1;
@@ -275,21 +318,21 @@
 
     <div class="result" id="result">
       <div class="share-card" id="shareCard">
+        <div class="share-key-strip">
+          <svg viewBox="0 0 160 14" preserveAspectRatio="xMidYMid meet"><polyline points="0,7 10,7 10,0 20,0 20,14 30,14 30,0 40,0 40,7 50,7 50,0 60,0 60,14 70,14 70,0 80,0 80,7 90,7 90,0 100,0 100,14 110,14 110,0 120,0 120,7 130,7 130,0 140,0 140,14 150,14 150,0 160,0" fill="none" stroke="#A97C3B" stroke-width="1.5"/></svg>
+        </div>
         <div class="share-title">我的希臘名字</div>
         <div class="name" id="outName">—</div>
         <div class="line-en" id="outLineEn">—</div>
         <div class="line-zh" id="outLineZh">—</div>
         <div class="etymology" id="outEtymology"></div>
         <div class="patron" id="outPatron"></div>
+        <div class="share-key-strip">
+          <svg viewBox="0 0 160 14" preserveAspectRatio="xMidYMid meet"><polyline points="0,7 10,7 10,0 20,0 20,14 30,14 30,0 40,0 40,7 50,7 50,0 60,0 60,14 70,14 70,0 80,0 80,7 90,7 90,0 100,0 100,14 110,14 110,0 120,0 120,7 130,7 130,0 140,0 140,14 150,14 150,0 160,0" fill="none" stroke="#A97C3B" stroke-width="1.5"/></svg>
+        </div>
       </div>
 
       <button class="mode-btn" id="rerollBtn" style="width:100%; flex:none; margin-top:36px;">不喜歡這個名字，想看其他的</button>
-
-      <div class="format-row" id="formatRow">
-        <div class="format-pill active" data-format="story">限動／Reels</div>
-        <div class="format-pill" data-format="post">貼文</div>
-        <div class="format-pill" data-format="square">訊息／方形</div>
-      </div>
 
       <div class="action-row">
         <button class="action-btn" id="downloadBtn">
@@ -302,6 +345,15 @@
         </button>
       </div>
     </div>
+  </div>
+</div>
+
+<div class="format-modal-overlay" id="formatModalOverlay">
+  <div class="format-modal">
+    <p>要下載哪種比例的圖片？</p>
+    <button class="format-modal-btn" id="pickStory">限動／Reels（9:16）</button>
+    <button class="format-modal-btn" id="pickSquare">方形（1:1）</button>
+    <button class="format-modal-cancel" id="pickCancel">取消</button>
   </div>
 </div>
 
@@ -1146,26 +1198,15 @@ const SITE_URL = 'https://gemmagemini.github.io/greek-name-generator/';
 
 const shareFormats = {
   story: {width:400, height: Math.round(400*1920/1080), label:"限動／Reels"},
-  post: {width:400, height: Math.round(400*1350/1080), label:"貼文"},
   square: {width:400, height:400, label:"訊息／方形"}
 };
 
-let currentFormat = 'story';
-
-document.querySelectorAll('.format-pill').forEach(p=>{
-  p.addEventListener('click', ()=>{
-    document.querySelectorAll('.format-pill').forEach(x=>x.classList.remove('active'));
-    p.classList.add('active');
-    currentFormat = p.dataset.format;
-  });
-});
-
-async function captureCard(){
+async function captureCard(formatKey){
   if(typeof html2canvas === 'undefined'){
     alert('圖片截圖功能載入失敗，可能是網路限制或瀏覽器擋掉了外部資源，請確認網路連線後重新整理頁面再試一次');
     return null;
   }
-  const fmt = shareFormats[currentFormat] || shareFormats.square;
+  const fmt = shareFormats[formatKey] || shareFormats.square;
   const source = document.getElementById('shareCard');
   const temp = document.createElement('div');
   temp.className = 'share-card';
@@ -1198,10 +1239,10 @@ function canvasToBlob(canvas){
   return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
 }
 
-document.getElementById('downloadBtn').addEventListener('click', async ()=>{
+async function doDownload(formatKey){
   const nameText = document.getElementById('outName').textContent || 'greek-name';
   const win = window.open('', '_blank');
-  const canvas = await captureCard();
+  const canvas = await captureCard(formatKey);
   if(!canvas){
     if(win) win.close();
     return;
@@ -1225,13 +1266,39 @@ document.getElementById('downloadBtn').addEventListener('click', async ()=>{
     link.href = dataUrl;
     link.click();
   }
+}
+
+const formatModalOverlay = document.getElementById('formatModalOverlay');
+
+document.getElementById('downloadBtn').addEventListener('click', ()=>{
+  formatModalOverlay.classList.add('show');
+});
+
+document.getElementById('pickStory').addEventListener('click', ()=>{
+  formatModalOverlay.classList.remove('show');
+  doDownload('story');
+});
+
+document.getElementById('pickSquare').addEventListener('click', ()=>{
+  formatModalOverlay.classList.remove('show');
+  doDownload('square');
+});
+
+document.getElementById('pickCancel').addEventListener('click', ()=>{
+  formatModalOverlay.classList.remove('show');
+});
+
+formatModalOverlay.addEventListener('click', (e)=>{
+  if(e.target === formatModalOverlay){
+    formatModalOverlay.classList.remove('show');
+  }
 });
 
 document.getElementById('shareBtn').addEventListener('click', async ()=>{
   const nameText = document.getElementById('outName').textContent || 'greek-name';
   const titleZh = document.getElementById('outLineZh').textContent || '';
   const shareText = `我的希臘名字是 ${nameText}，${titleZh}\n點這裡找尋你的希臘名字：${SITE_URL}`;
-  const canvas = await captureCard();
+  const canvas = await captureCard('square');
   if(!canvas) return;
   const blob = await canvasToBlob(canvas);
   if(!blob){
